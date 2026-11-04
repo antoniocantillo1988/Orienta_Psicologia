@@ -15,16 +15,16 @@ const servicios = [
   {
     icon: HeartHandshake,
     color: 'bg-terracota-100 text-terracota-600',
-    titulo: 'Orientación y apoyo a cuidadores',
+    titulo: 'Orientación y apoyo a cuidadores/as',
     texto:
       'Un espacio de respiro y guía para quienes dedican su vida al cuidado de un familiar: estrategias de autocuidado, gestión del estrés y acompañamiento en la adaptación al rol de cuidador.',
   },
   {
     icon: Brain,
     color: 'bg-sage-100 text-sage-600',
-    titulo: 'Intervención neuropsicológica',
+    titulo: 'Mediador de familias',
     texto:
-      'Valoración de capacidades cognitivas y planes de estimulación adaptados al hogar, con pautas de comunicación y orientación ambiental para toda la familia.',
+      'Pautas de comunicación, mediación y orientación ambiental para toda la familia.',
   },
 ];
 
@@ -32,12 +32,12 @@ const pasos = [
   {
     icon: ClipboardList,
     titulo: 'Evaluación inicial',
-    texto: 'Analizamos la situación del cuidador y de su familiar para identificar los focos de sobrecarga y las áreas prioritarias.',
+    texto: 'Analizamos la situación del cuidador o cuidadora y de su familiar para identificar los focos de sobrecarga y las áreas prioritarias.',
   },
   {
     icon: Route,
     titulo: 'Plan de acción práctico',
-    texto: 'Pautas directas y aplicables en el día a día, con atención presencial a domicilio o en formato online seguro.',
+    texto: 'Pautas claras, personalizadas y aplicables en el día a día, con atención presencial a domicilio u online.',
   },
   {
     icon: RefreshCw,
@@ -66,11 +66,11 @@ export default function AcercaDe() {
         <header className={`${cristal} text-center`}>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-oro-600">Acerca de nosotros</p>
           <h1 className="mt-3 font-serif text-3xl font-bold text-tierra-800 sm:text-4xl">
-            Apoyo neuropsicológico y orientación experta para cuidadores y familias
+            Apoyo, acompañamiento y orientación experta para cuidadores, cuidadoras y familias
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-stone-600">
-            Reducimos la carga invisible del cuidador mediante estrategias de estimulación cognitiva,
-            organización domiciliaria y bienestar emocional preventivo. Un enfoque humano, cercano y especializado.
+            Reducimos la carga invisible del cuidador/a mediante estrategias de estimulación cognitiva
+           en el contexto natural y bienestar emocional preventivo. Un enfoque humano, cercano y especializado.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link to="/citas" className="btn-primary">Reserva una sesión de orientación</Link>
@@ -82,8 +82,8 @@ export default function AcercaDe() {
         <section className={cristal}>
           <h2 className="font-serif text-2xl font-bold text-tierra-800">Sobre mí y mi marco profesional</h2>
           <p className="mt-3 text-stone-600">
-            Ofrezco un espacio de acompañamiento riguroso y humano a quienes dedican su vida al cuidado de
-            familiares con dependencia o necesidades neurodesarrolladas.
+            Ofrezco un espacio de acompañamiento humano a quienes dedican su vida al cuidado de
+            familiares con dependencia, enfermedades degenerativas u otras necesidades.
           </p>
 
           <ul className="mt-5 space-y-3">
@@ -98,8 +98,8 @@ export default function AcercaDe() {
           </ul>
 
           <blockquote className="mt-6 border-l-4 border-terracota-500 pl-4 font-serif italic text-stone-600">
-            Mi labor se centra en la psicoeducación, la estimulación neuropsicológica y la consultoría de apoyo
-            al cuidador, ofreciendo herramientas prácticas para el día a día, la gestión del estrés derivado de
+            Mi labor se centra en el acompañamiento y atención individualizada 
+            al cuidador/a, ofreciendo herramientas prácticas para el día a día, la gestión del estrés derivado de
             la atención prolongada y la mejora de la calidad de vida en el entorno familiar, trabajando en red
             con otros profesionales sociosanitarios cuando el caso lo requiere.
           </blockquote>
@@ -147,7 +147,7 @@ export default function AcercaDe() {
           <div className={cristal}>
             <h2 className="font-serif text-xl font-bold text-tierra-800">Divulgación</h2>
             <p className="mt-2 text-sm leading-relaxed text-stone-600">
-              Pautas breves y recursos sobre neuropsicología cotidiana y bienestar del cuidador.
+              Pautas breves y recursos sobre hábitos de vida saludable y bienestar del cuidador/a.
             </p>
             <a
               href="https://www.instagram.com/orientamejoraemocional/"
@@ -163,7 +163,7 @@ export default function AcercaDe() {
             <h2 className="font-serif text-xl font-bold text-tierra-800">Contacto y zona de actuación</h2>
             <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-stone-600">
               <MapPin size={16} className="mt-0.5 shrink-0 text-terracota-500" />
-              Málaga capital, Campanillas y un radio de 25 km, con atención presencial a domicilio u online.
+              Málaga con atención presencial a domicilio u online.
             </p>
             <a
               href="https://wa.me/34678766839"
