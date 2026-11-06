@@ -93,14 +93,14 @@ export default function Home() {
       <section className="rounded-3xl border border-crema-200 bg-white p-8 text-center shadow-suave sm:p-10">
         <h2 className="font-serif text-2xl font-bold text-tierra-800">No tienes que cargar con todo solo o sola. </h2>        
         <p className="mt-3 text-stone-600">
-            Cuidar de un familiar con una enfermedad neurodegenerativa supone un desgaste invisible, y muchas veces quien cuida se olvida de sí mismo hasta llegar al límite. Mi objetivo es acompañarte para que encuentres respiro, alivies la tensión y recuperes el equilibrio en tu día a día, sin tecnicismos y con pautas que funcionan en casa.
+            Cuidar de un familiar con una enfermedad neurodegenerativa supone un desgaste invisible, y muchas veces quien cuida se olvida de sí mismo hasta llegar al límite. Mi objetivo es acompañarte para que encuentres respiro, alivies la tensión y recuperes el equilibrio en tu día a día, sin tecnicismos y con pautas que te funcionen en casa.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link to="/citas" className="btn-primary">Pedir cita previa</Link>
           <a href="https://wa.me/34678766839" target="_blank" rel="noopener noreferrer" className="btn-outline">Consultar dudas por WhatsApp</a>
         </div>
         <p className="mx-auto mt-3 max-w-xl text-stone-600">
-          Atención presencial a domicilio en Málaga capital o sesiones online, adaptadas a tus horarios y a tus necesidades de descanso.
+          Atención a domicilio en Málaga capital u online, adaptadas a tus horarios y necesidades.
         </p>
       </section>
 
