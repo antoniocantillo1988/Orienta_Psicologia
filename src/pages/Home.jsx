@@ -100,7 +100,7 @@ export default function Home() {
           <a href="https://wa.me/34678766839" target="_blank" rel="noopener noreferrer" className="btn-outline">Consultar dudas por WhatsApp</a>
         </div>
         <p className="mx-auto mt-3 max-w-xl text-stone-600">
-          Atención a domicilio en Málaga capital u online, adaptadas a tus horarios y necesidades.
+          Atención a domicilio en Málaga capital y online, adaptadas a tus horarios y necesidades.
         </p>
       </section>
 
