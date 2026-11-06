@@ -160,7 +160,7 @@ export default function AcercaDe() {
             <h2 className="font-serif text-xl font-bold text-tierra-800">Contacto y zona de actuación</h2>
             <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-stone-600">
               <MapPin size={16} className="mt-0.5 shrink-0 text-terracota-500" />
-              Atención presencial a domicilio en Málaga capital y alrededores, o cómodamente online.
+              Atención a domicilio en Málaga capital y online.
             </p>
             <a
               href="https://wa.me/34678766839"
