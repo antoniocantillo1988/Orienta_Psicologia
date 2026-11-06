@@ -152,7 +152,7 @@ export default function AcercaDe() {
               rel="noopener noreferrer"
               className="btn-outline mt-4"
             >
-              <AtSign size={16} /> @orientamejoraemocional
+              <AtSign size={16} /> @orientapsicologiamalaga
             </a>
           </div>
 
