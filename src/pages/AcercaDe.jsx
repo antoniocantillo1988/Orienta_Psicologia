@@ -80,9 +80,13 @@ export default function AcercaDe() {
         {/* Sobre mí */}
         <section className={cristal}>
           <h2 className="font-serif text-2xl font-bold text-tierra-800">Sobre mí y mi marco profesional</h2>
-          <p className="mt-3 text-stone-600">
-            Cuidar de un familiar con una enfermedad neurodegenerativa supone un desgaste invisible, y muchas veces quien cuida se olvida de sí mismo hasta llegar al límite. Mi objetivo es acompañarte para que encuentres respiro, alivies la tensión y recuperes el equilibrio en tu día a día, sin tecnicismos y con pautas que funcionan en casa.
-          </p>
+        
+          <blockquote className="mt-6 border-l-4 border-terracota-500 pl-4 font-serif italic text-stone-600">
+            Mi labor se centra en el acompañamiento y atención individualizada 
+            al cuidador/a, ofreciendo herramientas prácticas para el día a día, la gestión del estrés derivado de
+            la atención prolongada y la mejora de la calidad de vida en el entorno familiar, trabajando en red
+            con otros profesionales sociosanitarios cuando el caso lo requiere.
+          </blockquote>
 
           <ul className="mt-5 space-y-3">
             {credenciales.map(({ icon: Icon, texto }) => (
@@ -95,12 +99,7 @@ export default function AcercaDe() {
             ))}
           </ul>
 
-          <blockquote className="mt-6 border-l-4 border-terracota-500 pl-4 font-serif italic text-stone-600">
-            Mi labor se centra en el acompañamiento y atención individualizada 
-            al cuidador/a, ofreciendo herramientas prácticas para el día a día, la gestión del estrés derivado de
-            la atención prolongada y la mejora de la calidad de vida en el entorno familiar, trabajando en red
-            con otros profesionales sociosanitarios cuando el caso lo requiere.
-          </blockquote>
+          
         </section>
 
         {/* Áreas de servicio */}
