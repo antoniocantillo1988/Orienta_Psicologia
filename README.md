@@ -1,2 +1,2 @@
-# braintrain-plataforma
-La aplicación de cribado neuropsicológico que revoluciona en atención temprana. 
+# Orienta Psicología
+Un espacio orientado para aquellos olvidados que son los cuidadores de personas con problemas degenerativos. 
