@@ -17,14 +17,14 @@ const servicios = [
     color: 'bg-terracota-100 text-terracota-600',
     titulo: 'Orientación y apoyo a cuidadores/as',
     texto:
-      'Un espacio de respiro y guía para quienes dedican su vida al cuidado de un familiar: estrategias de autocuidado, gestión del estrés y acompañamiento en la adaptación al rol de cuidador.',
+      'Un espacio de respiro exclusivo para ti. Te ayudo a gestionar el estrés del día a día, a lidiar con la culpa, a adaptarte a los cambios de la enfermedad y a integrar pautas de autocuidado real en tu rutina.',
   },
   {
     icon: Brain,
     color: 'bg-sage-100 text-sage-600',
-    titulo: 'Mediador de familias',
+    titulo: 'Orientación familiar',
     texto:
-      'Pautas de comunicación, mediación y orientación ambiental para toda la familia.',
+      'Cuando hay tensión en la familia en torno al cuidado, ofrecemos pautas de comunicación clara y orientación del entorno para que todos remen en la misma dirección.',
   },
 ];
 
@@ -66,11 +66,10 @@ export default function AcercaDe() {
         <header className={`${cristal} text-center`}>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-oro-600">Acerca de nosotros</p>
           <h1 className="mt-3 font-serif text-3xl font-bold text-tierra-800 sm:text-4xl">
-            Apoyo, acompañamiento y orientación experta para cuidadores, cuidadoras y familias
+            Un espacio humano, seguro y sin juicios para quienes cuidan con el corazón
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-stone-600">
-            Reducimos la carga invisible del cuidador/a mediante estrategias de estimulación cognitiva
-           en el contexto natural y bienestar emocional preventivo. Un enfoque humano, cercano y especializado.
+            Acompañamiento cercano, con pautas prácticas de autocuidado y gestión del estrés para quien cuida de un familiar con una enfermedad neurodegenerativa. En Málaga, a domicilio u online.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link to="/citas" className="btn-primary">Reserva una sesión de orientación</Link>
@@ -82,8 +81,7 @@ export default function AcercaDe() {
         <section className={cristal}>
           <h2 className="font-serif text-2xl font-bold text-tierra-800">Sobre mí y mi marco profesional</h2>
           <p className="mt-3 text-stone-600">
-            Ofrezco un espacio de acompañamiento humano a quienes dedican su vida al cuidado de
-            familiares con dependencia, enfermedades degenerativas u otras necesidades.
+            Cuidar de un familiar con una enfermedad neurodegenerativa supone un desgaste invisible, y muchas veces quien cuida se olvida de sí mismo hasta llegar al límite. Mi objetivo es acompañarte para que encuentres respiro, alivies la tensión y recuperes el equilibrio en tu día a día, sin tecnicismos y con pautas que funcionan en casa.
           </p>
 
           <ul className="mt-5 space-y-3">
@@ -163,7 +161,7 @@ export default function AcercaDe() {
             <h2 className="font-serif text-xl font-bold text-tierra-800">Contacto y zona de actuación</h2>
             <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-stone-600">
               <MapPin size={16} className="mt-0.5 shrink-0 text-terracota-500" />
-              Málaga con atención presencial a domicilio u online.
+              Atención presencial a domicilio en Málaga capital y alrededores, o cómodamente online.
             </p>
             <a
               href="https://wa.me/34678766839"
