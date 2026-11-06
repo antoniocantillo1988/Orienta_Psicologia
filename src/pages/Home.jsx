@@ -49,7 +49,7 @@ export default function Home() {
               ¿Cuidas de alguien y sientes que ya no te queda energía para ti?
             </h1>
             <p className="mt-4 text-stone-600">
-              No tienes que llevar este peso a solas. Te acompaño de forma cercana con estrategias prácticas de autocuidado, gestión del estrés y apoyo familiar en Málaga, a domicilio u online.
+              No tienes que llevar este peso a solas. Te acompaño de forma cercana con estrategias prácticas de autocuidado, gestión del estrés y apoyo familiar en Málaga, a domicilio y online.
             </p>
             <p className="mt-3 font-serif text-2xl font-bold text-sage-600">
               Acompañamiento a personas que cuidan
