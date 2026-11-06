@@ -147,7 +147,7 @@ export default function AcercaDe() {
               Pautas breves y recursos sobre hábitos de vida saludable y bienestar del cuidador/a.
             </p>
             <a
-              href="https://www.instagram.com/orientamejoraemocional/"
+              href="https://www.instagram.com/orientapsicologiamalaga/"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-outline mt-4"
