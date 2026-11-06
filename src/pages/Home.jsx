@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LifeBuoy, Baby, GraduationCap } from 'lucide-react';
+import { LifeBuoy, Brain, BadgeCheck, HeartHandshake } from 'lucide-react';
 
 const testimonios = [
   { texto: 'Las sesiones con Antonio han sido un antes y un después. Me ha ayudado a gestionar mi ansiedad de una forma muy práctica.', autor: 'María G.', perfil: 'Estudiante de Derecho' },
@@ -10,11 +10,15 @@ const testimonios = [
   { texto: 'El enfoque resolutivo de Antonio es lo que más destaco. Herramientas reales para el día a día.', autor: 'Laura M.', perfil: 'Profesional en activo' },
 ];
 
-const especialidades = [                                
-  { icon: LifeBuoy, titulo: 'Apoyo al cuidador', texto: 'Orientación personalizada y cercana, psicoeducación y estrategias de autocuidado para quien cuida de un familiar.', color: 'bg-terracota-100 text-terracota-600' },
-  { icon: Baby, titulo: 'Neurodesarrollo', texto: 'Evaluación y estimulación neuropsicológica y pautas prácticas a familias.', color: 'bg-sage-100 text-sage-600' },
-  { icon: GraduationCap, titulo: 'Mediación', texto: 'Desarrollo personal, acompañado en tu propio entorno cotidiano.', color: 'bg-oro-100 text-oro-600' },
+const especialidades = [
+  { icon: Brain, titulo: 'Alivio del estrés diario', texto: 'Herramientas sencillas para calmar la mente cuando la situación te desborda.', color: 'bg-sage-100 text-sage-600' },
+  { icon: LifeBuoy, titulo: 'Menos agotamiento', texto: 'Aprende a poner límites y a recuperar espacios de respiro para ti.', color: 'bg-terracota-100 text-terracota-600' },
+  { icon: BadgeCheck, titulo: 'Recupera tu autoestima', texto: 'Vuelve a conectar con tu propia identidad más allá de ser cuidador o cuidadora.', color: 'bg-oro-100 text-oro-600' },
+  { icon: HeartHandshake, titulo: 'Paz en el entorno familiar', texto: 'Pautas de comunicación para que las decisiones del día a día se lleven en equipo.', color: 'bg-sage-100 text-sage-600' },
 ];
+
+// Activa solo con testimonios reales y autorización por escrito de cada persona
+const MOSTRAR_TESTIMONIOS = false;
 
 export default function Home() {
   const [index, setIndex] = useState(0);
@@ -39,16 +43,16 @@ export default function Home() {
         <div className="relative flex flex-col-reverse items-center gap-8 md:flex-row md:justify-between">
           <div className="text-center md:text-left">
             <span className="inline-block rounded-full bg-sage-100 px-4 py-1 text-xs font-semibold tracking-wide text-sage-700">
-              Psicólogo colegiado AO 14923 · Neuropsicología
+              Antonio Cantillo Rueda · Psicólogo colegiado AO 14923
             </span>
-            <h1 className="mt-4 font-serif text-4xl font-bold text-tierra-800 sm:text-5xl">
-              Antonio Cantillo Rueda
+            <h1 className="mt-4 font-serif text-3xl font-bold text-tierra-800 sm:text-4xl">
+              ¿Cuidas de alguien y sientes que ya no te queda energía para ti?
             </h1>
             <p className="mt-4 text-stone-600">
-              Psicología clínica con un enfoque humano, resolutivo y proactivo.
+              No tienes que llevar este peso a solas. Te acompaño de forma cercana con estrategias prácticas de autocuidado, gestión del estrés y apoyo familiar en Málaga, a domicilio u online.
             </p>
             <p className="mt-3 font-serif text-2xl font-bold text-sage-600">
-              Especialista en personas que cuidan
+              Acompañamiento a personas que cuidan
             </p>
             <p className="mt-1 font-serif italic text-terracota-500">Acompañamos a quien cuida</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
@@ -73,7 +77,7 @@ export default function Home() {
       </section>
 
       {/* Especialidades */}
-      <section className="grid gap-6 md:grid-cols-3">
+      <section className="grid gap-6 md:grid-cols-2">
         {especialidades.map(({ icon: Icon, titulo, texto, color }) => (
           <div key={titulo} className="card-orienta transition hover:-translate-y-1 hover:shadow-suave">
             <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${color}`}>
@@ -85,7 +89,20 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Carrusel de testimonios */}
+      {/* Llamada a la acción */}
+      <section className="rounded-3xl border border-crema-200 bg-white p-8 text-center shadow-suave sm:p-10">
+        <h2 className="font-serif text-2xl font-bold text-tierra-800">No tienes que cargar con todo tú solo o sola. Hablemos.</h2>
+        <p className="mx-auto mt-3 max-w-xl text-stone-600">
+          Atención presencial a domicilio en Málaga capital o sesiones online, adaptadas a tus horarios y a tus necesidades de descanso.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link to="/citas" className="btn-primary">Pedir cita previa</Link>
+          <a href="https://wa.me/34678766839" target="_blank" rel="noopener noreferrer" className="btn-outline">Consultar dudas por WhatsApp</a>
+        </div>
+      </section>
+
+      {/* Carrusel de testimonios (desactivado hasta tener testimonios reales) */}
+      {MOSTRAR_TESTIMONIOS && (
       <section className="overflow-hidden rounded-3xl bg-sage-500 px-6 py-12 text-center text-white">
         <h2 className="mb-8 font-serif text-2xl font-bold">Lo que dicen de nosotros</h2>
         <div className="relative flex h-44 items-center justify-center">
@@ -110,6 +127,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      )}
     </div>
   );
 }
