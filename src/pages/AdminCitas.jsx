@@ -11,17 +11,18 @@ const ESTADO_ESTILOS = {
   completada: 'bg-stone-100 text-stone-500',
 };
 
-//Modificación para poder seleccionar en que sede acudir
-const [nuevo, setNuevo] = useState({
-  fecha: '', hora_inicio: '', hora_fin: '',
-  modalidad: 'online', sede_cita: 'malaga',
-});
-
-//Etiquetas de las sedes y de la modalidad
-const ETIQUETA_SEDE = { malaga: 'Málaga', cordoba: 'Córdoba' };
-const ETIQUETA_MODALIDAD = { online: 'Online', domicilio: 'A domicilio' };
-
 const FILTROS = ['todas', 'pendiente', 'confirmada', 'completada', 'cancelada'];
+
+const ETIQUETA_SEDE = { malaga: 'Málaga', cordoba: 'Córdoba' };
+const ETIQUETA_MODALIDAD = { online: 'Online', presencial: 'A domicilio' };
+
+const HUECO_VACIO = {
+  fecha: '',
+  hora_inicio: '',
+  hora_fin: '',
+  modalidad: 'online',
+  sede_cita: 'malaga',
+};
 
 function formatFecha(fecha) {
   return new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', {
@@ -36,7 +37,7 @@ export default function AdminCitas() {
   const [cargando, setCargando] = useState(true);
   const [mensaje, setMensaje] = useState(null);
   const [enlaces, setEnlaces] = useState({}); // enlace editable por cita
-  const [nuevo, setNuevo] = useState({ fecha: '', hora_inicio: '', hora_fin: '', modalidad: 'online' });
+  const [nuevo, setNuevo] = useState(HUECO_VACIO);
 
   const cargar = useCallback(async () => {
     try {
@@ -53,7 +54,9 @@ export default function AdminCitas() {
     }
   }, []);
 
-  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => {
+    cargar();
+  }, [cargar]);
 
   async function ejecutar(fn, textoOk) {
     setMensaje(null);
@@ -85,6 +88,7 @@ export default function AdminCitas() {
     e.preventDefault();
     ejecutar(async () => {
       await api.post('/admin/huecos', nuevo);
+      // Mantiene sede y modalidad; solo limpia las horas
       setNuevo({ ...nuevo, hora_inicio: '', hora_fin: '' });
     }, 'Hueco creado.');
   };
@@ -126,7 +130,9 @@ export default function AdminCitas() {
                 key={f}
                 onClick={() => setFiltro(f)}
                 className={`rounded-full px-3 py-1 text-xs font-semibold capitalize transition ${
-                  filtro === f ? 'bg-sage-500 text-white' : 'bg-white text-stone-600 border border-crema-300 hover:bg-crema-100'
+                  filtro === f
+                    ? 'bg-sage-500 text-white'
+                    : 'bg-white text-stone-600 border border-crema-300 hover:bg-crema-100'
                 }`}
               >
                 {f}
@@ -143,12 +149,18 @@ export default function AdminCitas() {
               <div key={c.id} className="card-orienta !p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-tierra-800">{c.nombre_usuario}
+                    <p className="font-semibold text-tierra-800">
+                      {c.nombre_usuario}
                       <span className="ml-2 text-xs font-normal text-stone-400">{c.email}</span>
                     </p>
                     <p className="mt-1 text-sm text-stone-600">
                       {formatFecha(c.fecha)} · {c.hora_inicio?.slice(0, 5)}–{c.hora_fin?.slice(0, 5)}
                     </p>
+                    {c.sede_cita && (
+                      <p className="mt-1 text-xs text-stone-500">
+                        {ETIQUETA_SEDE[c.sede_cita]} · {ETIQUETA_MODALIDAD[c.modalidad]}
+                      </p>
+                    )}
                     {c.motivo_consulta && (
                       <p className="mt-1 text-sm italic text-stone-500">“{c.motivo_consulta}”</p>
                     )}
@@ -187,11 +199,18 @@ export default function AdminCitas() {
                     </>
                   )}
                   {c.estado !== 'cancelada' && (
-                    <button onClick={() => cambiarEstado(c, 'cancelada')} className="btn-outline !px-3 !py-2 !text-terracota-600 !border-terracota-200">
+                    <button
+                      onClick={() => cambiarEstado(c, 'cancelada')}
+                      className="btn-outline !px-3 !py-2 !text-terracota-600 !border-terracota-200"
+                    >
                       <X size={14} /> Cancelar
                     </button>
                   )}
-                  <button onClick={() => eliminarCita(c)} className="p-2 text-stone-400 hover:text-terracota-600" aria-label="Eliminar cita">
+                  <button
+                    onClick={() => eliminarCita(c)}
+                    className="p-2 text-stone-400 hover:text-terracota-600"
+                    aria-label="Eliminar cita"
+                  >
                     <Trash2 size={18} />
                   </button>
                 </div>
@@ -205,40 +224,67 @@ export default function AdminCitas() {
       <section>
         <h2 className="mb-4 text-lg font-bold text-tierra-800">Huecos de disponibilidad</h2>
 
-        //NUEVO FORMULARIO
         <form onSubmit={crearHueco} className="card-orienta !p-4 grid items-end gap-3 sm:grid-cols-6">
-          <label className="text-xs font-medium text-stone-600">Fecha
-            <input type="date" required value={nuevo.fecha}
+          <label className="text-xs font-medium text-stone-600">
+            Fecha
+            <input
+              type="date"
+              required
+              value={nuevo.fecha}
               onChange={(e) => setNuevo({ ...nuevo, fecha: e.target.value })}
-              className={`${input} mt-1`} />
+              className={`${input} mt-1`}
+            />
           </label>
-          <label className="text-xs font-medium text-stone-600">Inicio
-            <input type="time" required value={nuevo.hora_inicio}
+
+          <label className="text-xs font-medium text-stone-600">
+            Inicio
+            <input
+              type="time"
+              required
+              value={nuevo.hora_inicio}
               onChange={(e) => setNuevo({ ...nuevo, hora_inicio: e.target.value })}
-              className={`${input} mt-1`} />
+              className={`${input} mt-1`}
+            />
           </label>
-          <label className="text-xs font-medium text-stone-600">Fin
-            <input type="time" required value={nuevo.hora_fin}
-            onChange={(e) => setNuevo({ ...nuevo, hora_fin: e.target.value })}
-            className={`${input} mt-1`} />
+
+          <label className="text-xs font-medium text-stone-600">
+            Fin
+            <input
+              type="time"
+              required
+              value={nuevo.hora_fin}
+              onChange={(e) => setNuevo({ ...nuevo, hora_fin: e.target.value })}
+              className={`${input} mt-1`}
+            />
           </label>
-          <label className="text-xs font-medium text-stone-600">Sede
-            <select value={nuevo.sede_cita}
-            onChange={(e) => setNuevo({ ...nuevo, sede_cita: e.target.value })}
-            className={`${input} mt-1`}>
-          <option value="malaga">Málaga</option>
-          <option value="cordoba">Córdoba</option>
-          </select>
+
+          <label className="text-xs font-medium text-stone-600">
+            Sede
+            <select
+              value={nuevo.sede_cita}
+              onChange={(e) => setNuevo({ ...nuevo, sede_cita: e.target.value })}
+              className={`${input} mt-1`}
+            >
+              <option value="malaga">Málaga</option>
+              <option value="cordoba">Córdoba</option>
+            </select>
           </label>
-          <label className="text-xs font-medium text-stone-600">Modalidad
-            <select value={nuevo.modalidad}
-            onChange={(e) => setNuevo({ ...nuevo, modalidad: e.target.value })}
-            className={`${input} mt-1`}>
-          <option value="online">Online</option>
-          <option value="domicilio">A domicilio</option>
-          </select>
+
+          <label className="text-xs font-medium text-stone-600">
+            Modalidad
+            <select
+              value={nuevo.modalidad}
+              onChange={(e) => setNuevo({ ...nuevo, modalidad: e.target.value })}
+              className={`${input} mt-1`}
+            >
+              <option value="online">Online</option>
+              <option value="presencial">A domicilio</option>
+            </select>
           </label>
-          <button type="submit" className="btn-primary !py-2.5"><Plus size={16} /> Añadir</button>
+
+          <button type="submit" className="btn-primary !py-2.5">
+            <Plus size={16} /> Añadir
+          </button>
         </form>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -246,16 +292,22 @@ export default function AdminCitas() {
             <p className="text-sm text-stone-400">No hay huecos libres.</p>
           ) : (
             huecos.map((h) => (
-                // Dentro del map de huecos:
-                <span key={h.id} className="inline-flex items-center gap-2 rounded-full border border-crema-300 bg-white py-1.5 pl-4 pr-2 text-sm text-stone-700">
-                  {formatFecha(h.fecha)} · {h.hora_inicio?.slice(0, 5)}
-                  <em className="text-xs text-stone-400">
+              <span
+                key={h.id}
+                className="inline-flex items-center gap-2 rounded-full border border-crema-300 bg-white py-1.5 pl-4 pr-2 text-sm text-stone-700"
+              >
+                {formatFecha(h.fecha)} · {h.hora_inicio?.slice(0, 5)}
+                <em className="text-xs text-stone-400">
                   {ETIQUETA_SEDE[h.sede_cita]} · {ETIQUETA_MODALIDAD[h.modalidad]}
-                  </em>
-                  <button onClick={() => eliminarHueco(h)} className="rounded-full p-1 text-stone-400 hover:bg-terracota-100 hover:text-terracota-600" aria-label="Eliminar hueco">
+                </em>
+                <button
+                  onClick={() => eliminarHueco(h)}
+                  className="rounded-full p-1 text-stone-400 hover:bg-terracota-100 hover:text-terracota-600"
+                  aria-label="Eliminar hueco"
+                >
                   <X size={14} />
-                  </button>
-                </span>
+                </button>
+              </span>
             ))
           )}
         </div>
