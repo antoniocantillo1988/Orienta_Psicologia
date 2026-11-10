@@ -11,6 +11,16 @@ const ESTADO_ESTILOS = {
   completada: 'bg-stone-100 text-stone-500',
 };
 
+//Modificación para poder seleccionar en que sede acudir
+const [nuevo, setNuevo] = useState({
+  fecha: '', hora_inicio: '', hora_fin: '',
+  modalidad: 'online', sede_cita: 'malaga',
+});
+
+//Etiquetas de las sedes y de la modalidad
+const ETIQUETA_SEDE = { malaga: 'Málaga', cordoba: 'Córdoba' };
+const ETIQUETA_MODALIDAD = { online: 'Online', domicilio: 'A domicilio' };
+
 const FILTROS = ['todas', 'pendiente', 'confirmada', 'completada', 'cancelada'];
 
 function formatFecha(fecha) {
@@ -195,21 +205,38 @@ export default function AdminCitas() {
       <section>
         <h2 className="mb-4 text-lg font-bold text-tierra-800">Huecos de disponibilidad</h2>
 
-        <form onSubmit={crearHueco} className="card-orienta !p-4 grid items-end gap-3 sm:grid-cols-5">
+        //NUEVO FORMULARIO
+        <form onSubmit={crearHueco} className="card-orienta !p-4 grid items-end gap-3 sm:grid-cols-6">
           <label className="text-xs font-medium text-stone-600">Fecha
-            <input type="date" required value={nuevo.fecha} onChange={(e) => setNuevo({ ...nuevo, fecha: e.target.value })} className={`${input} mt-1`} />
+            <input type="date" required value={nuevo.fecha}
+              onChange={(e) => setNuevo({ ...nuevo, fecha: e.target.value })}
+              className={`${input} mt-1`} />
           </label>
           <label className="text-xs font-medium text-stone-600">Inicio
-            <input type="time" required value={nuevo.hora_inicio} onChange={(e) => setNuevo({ ...nuevo, hora_inicio: e.target.value })} className={`${input} mt-1`} />
+            <input type="time" required value={nuevo.hora_inicio}
+              onChange={(e) => setNuevo({ ...nuevo, hora_inicio: e.target.value })}
+              className={`${input} mt-1`} />
           </label>
           <label className="text-xs font-medium text-stone-600">Fin
-            <input type="time" required value={nuevo.hora_fin} onChange={(e) => setNuevo({ ...nuevo, hora_fin: e.target.value })} className={`${input} mt-1`} />
+            <input type="time" required value={nuevo.hora_fin}
+            onChange={(e) => setNuevo({ ...nuevo, hora_fin: e.target.value })}
+            className={`${input} mt-1`} />
+          </label>
+          <label className="text-xs font-medium text-stone-600">Sede
+            <select value={nuevo.sede_cita}
+            onChange={(e) => setNuevo({ ...nuevo, sede_cita: e.target.value })}
+            className={`${input} mt-1`}>
+          <option value="malaga">Málaga</option>
+          <option value="cordoba">Córdoba</option>
+          </select>
           </label>
           <label className="text-xs font-medium text-stone-600">Modalidad
-            <select value={nuevo.modalidad} onChange={(e) => setNuevo({ ...nuevo, modalidad: e.target.value })} className={`${input} mt-1`}>
-              <option value="online">Online</option>
-              <option value="presencial">Presencial</option>
-            </select>
+            <select value={nuevo.modalidad}
+            onChange={(e) => setNuevo({ ...nuevo, modalidad: e.target.value })}
+            className={`${input} mt-1`}>
+          <option value="online">Online</option>
+          <option value="domicilio">A domicilio</option>
+          </select>
           </label>
           <button type="submit" className="btn-primary !py-2.5"><Plus size={16} /> Añadir</button>
         </form>
@@ -219,13 +246,16 @@ export default function AdminCitas() {
             <p className="text-sm text-stone-400">No hay huecos libres.</p>
           ) : (
             huecos.map((h) => (
-              <span key={h.id} className="inline-flex items-center gap-2 rounded-full border border-crema-300 bg-white py-1.5 pl-4 pr-2 text-sm text-stone-700">
-                {formatFecha(h.fecha)} · {h.hora_inicio?.slice(0, 5)}
-                {h.modalidad && <em className="text-xs text-stone-400">{h.modalidad}</em>}
-                <button onClick={() => eliminarHueco(h)} className="rounded-full p-1 text-stone-400 hover:bg-terracota-100 hover:text-terracota-600" aria-label="Eliminar hueco">
+                // Dentro del map de huecos:
+                <span key={h.id} className="inline-flex items-center gap-2 rounded-full border border-crema-300 bg-white py-1.5 pl-4 pr-2 text-sm text-stone-700">
+                  {formatFecha(h.fecha)} · {h.hora_inicio?.slice(0, 5)}
+                  <em className="text-xs text-stone-400">
+                  {ETIQUETA_SEDE[h.sede_cita]} · {ETIQUETA_MODALIDAD[h.modalidad]}
+                  </em>
+                  <button onClick={() => eliminarHueco(h)} className="rounded-full p-1 text-stone-400 hover:bg-terracota-100 hover:text-terracota-600" aria-label="Eliminar hueco">
                   <X size={14} />
-                </button>
-              </span>
+                  </button>
+                </span>
             ))
           )}
         </div>

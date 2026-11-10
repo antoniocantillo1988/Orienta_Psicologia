@@ -19,6 +19,10 @@ const ESTADO_ESTILOS = {
   completada: 'bg-stone-100 text-stone-500',
 };
 
+const ETIQUETA_SEDE = { malaga: 'Málaga', cordoba: 'Córdoba' };
+const ETIQUETA_MODALIDAD = { online: 'Online', domicilio: 'A domicilio' };
+
+
 // src/pages/Citas.jsx
 export default function Citas() {
   const { user } = useAuth();
@@ -167,21 +171,25 @@ export default function Citas() {
             huecosDelDia.map((h) => {
               const fechaHueco = new Date(`${h.fecha}T${h.hora_inicio || '00:00'}`);
               const esPasadoOProximo = fechaHueco < limiteReserva;
-
+              const activo = seleccionado?.id === h.id;
+              
               return (
                 <button
                   key={h.id}
                   disabled={esPasadoOProximo}
-                  onClick={() => setSeleccionado(seleccionado?.id === h.id ? null : h)}
-                  className={`px-4 py-2 rounded-lg text-sm border transition font-medium ${
-                    esPasadoOProximo 
+                  onClick={() => setSeleccionado(activo ? null : h)}
+                  className={`px-4 py-2 rounded-lg text-sm border transition font-medium text-left ${
+                    esPasadoOProximo
                       ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed'
-                      : seleccionado?.id === h.id 
-                        ? 'bg-teal-600 text-white' 
+                      : activo
+                        ? 'bg-teal-600 text-white border-teal-600'
                         : 'border-stone-300 text-stone-700 hover:border-teal-400'
                   }`}
                 >
-                  {h.hora_inicio?.slice(0, 5) || '--:--'}
+                  <span className="block">{h.hora_inicio?.slice(0, 5) || '--:--'}</span>
+                  <span className={`block text-xs ${activo ? 'text-teal-100' : 'text-stone-500'}`}>
+                  {ETIQUETA_SEDE[h.sede_cita]} · {ETIQUETA_MODALIDAD[h.modalidad]}
+                  </span>
                 </button>
               );
             })
@@ -216,19 +224,28 @@ export default function Citas() {
           <h2 className="text-base font-semibold text-stone-700 mb-4">Tus próximas citas</h2>
           {misCitas.length > 0 ? (
             misCitas.map((c) => (
-              <div key={c.id} className="bg-white border border-stone-200 rounded-xl p-4 mb-3 flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium">{formatFecha(c.fecha)} · {c.hora_inicio.slice(0, 5)}</p>
-                  <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium ${ESTADO_ESTILOS[c.estado]}`}>
-                    {c.estado}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  {c.estado === 'confirmada' && <a href={c.enlace_videollamada} target="_blank" rel="noreferrer" className="text-teal-600 text-xs font-bold">🎥 Unirse</a>}
-                  {c.estado === 'confirmada' && <button onClick={() => cancelarCita(c.id)} className="text-red-500 font-bold text-lg">✕</button>}
-                </div>
-              </div>
-            ))
+                  <div key={c.id} className="bg-white border border-stone-200 rounded-xl p-4 mb-3 flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-medium">{formatFecha(c.fecha)} · {c.hora_inicio.slice(0, 5)}</p>
+                      <p className="text-xs text-stone-500 mt-1">
+                        {ETIQUETA_SEDE[c.sede_cita]} · {ETIQUETA_MODALIDAD[c.modalidad]}
+                      </p>
+                      <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium ${ESTADO_ESTILOS[c.estado]}`}>
+                        {c.estado}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {c.estado === 'confirmada' && c.modalidad === 'online' && c.enlace_videollamada && (
+                        <a href={c.enlace_videollamada} target="_blank" rel="noreferrer" className="text-teal-600 text-xs font-bold">
+                          🎥 Unirse
+                        </a>
+                      )}
+                      {c.estado === 'confirmada' && (
+                        <button onClick={() => cancelarCita(c.id)} className="text-red-500 font-bold text-lg" aria-label="Cancelar cita">✕</button>
+                      )}
+                    </div>
+                  </div>
+                ))
           ) : (
             <p className="text-sm text-stone-500 bg-stone-50 rounded-lg p-4">Aún no tienes ninguna cita programada.</p>
           )}
