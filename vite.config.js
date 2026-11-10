@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    dedupe: ['react', 'react-dom'], // <-- Esto evita el conflicto de useState
+  },
   server: {
     // En desarrollo, redirige /api al backend si lo corres aparte
     // Si usas `vercel dev`, esto no hace falta.
