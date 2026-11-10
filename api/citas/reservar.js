@@ -3,20 +3,38 @@ import { query, json, requireAuth } from '../_db.js';
 import { crearEventoCalendar, cancelarEventoCalendar } from '../_calendar.js';
 import nodemailer from 'nodemailer';
 
+const HORAS_ANTELACION = 6;
+
+// Convierte fecha ('YYYY-MM-DD') + hora ('HH:MM:SS') de Madrid a un instante real
+function fechaMadridADate(fecha, hora) {
+  const [y, m, d] = fecha.split('-').map(Number);
+  const [hh, mm, ss = 0] = hora.split(':').map(Number);
+  const comoUTC = Date.UTC(y, m - 1, d, hh, mm, ss);
+
+  const partes = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Madrid', hourCycle: 'h23',
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric', second: 'numeric',
+  }).formatToParts(new Date(comoUTC));
+
+  const v = Object.fromEntries(partes.map((p) => [p.type, p.value]));
+  const madridComoUTC = Date.UTC(+v.year, +v.month - 1, +v.day, +v.hour, +v.minute, +v.second);
+  return new Date(comoUTC - (madridComoUTC - comoUTC));
+}
+
 export default async function handler(req, res) {
-  // Se restaura la llamada a requireAuth, que ahora funciona correctamente
-  // gracias a los cambios en _db.js.
   const user = await requireAuth(req, res);
-  
+  if (!user) return; // requireAuth ya ha respondido
+
   if (req.method !== 'POST') return json(res, 405, { error: 'Método no permitido' });
 
   const { disponibilidad_id, motivo_consulta } = req.body || {};
   if (!disponibilidad_id) return json(res, 400, { error: 'Falta el hueco seleccionado.' });
 
-  let google_evento_id_creado = null; // Variable para rastrear el evento de Google
+  let google_evento_id_creado = null;
 
   try {
-    // Comprobamos que el hueco sigue libre
+    // 1. Comprobar que el hueco sigue libre
     const huecos = await query(
       'SELECT * FROM disponibilidad WHERE id = ? AND ocupado = 0',
       [disponibilidad_id]
@@ -26,51 +44,51 @@ export default async function handler(req, res) {
     }
     const hueco = huecos[0];
 
-    // --- NUEVA VALIDACIÓN: Mínimo 2 horas de antelación ---
-    const fechaCita = new Date(`${hueco.fecha}T${hueco.hora_inicio}`);
-    const ahora = new Date();
-    // Calculamos la diferencia en milisegundos y convertimos a horas
-    const diferenciaHoras = (fechaCita - ahora) / (1000 * 60 * 60);
+    // 2. Validar antelación mínima de 6 horas (hora de Madrid)
+    const fechaTexto = hueco.fecha instanceof Date
+      ? `${hueco.fecha.getFullYear()}-${String(hueco.fecha.getMonth() + 1).padStart(2, '0')}-${String(hueco.fecha.getDate()).padStart(2, '0')}`
+      : String(hueco.fecha).slice(0, 10);
 
-    if (diferenciaHoras <= 2) {
-      return json(res, 400, { 
-        error: 'Las reservas deben realizarse con al menos 2 horas de antelación.' 
+    const fechaCita = fechaMadridADate(fechaTexto, hueco.hora_inicio);
+    const diferenciaHoras = (fechaCita - new Date()) / (1000 * 60 * 60);
+
+    if (diferenciaHoras < HORAS_ANTELACION) {
+      return json(res, 400, {
+        error: `Las reservas deben realizarse con al menos ${HORAS_ANTELACION} horas de antelación.`,
       });
     }
-    // ------------------------------------------------------
 
-    // Obtenemos datos del usuario para el evento
+    // 3. Datos del usuario
     const usuarios = await query(
       'SELECT nombre_usuario, email FROM usuarios WHERE id = ?',
       [user.id]
     );
     const { nombre_usuario, email } = usuarios[0];
 
-    // Creamos el evento en Google Calendar con Meet automático
+    // 4. Evento en Google Calendar con Meet
     const eventoGoogle = await crearEventoCalendar({
-      fecha:          hueco.fecha,
-      hora_inicio:    hueco.hora_inicio,
-      hora_fin:       hueco.hora_fin,
+      fecha:         fechaTexto,
+      hora_inicio:   hueco.hora_inicio,
+      hora_fin:      hueco.hora_fin,
       nombre_usuario,
-      email_usuario:  email,
-      motivo:         motivo_consulta || '',
+      email_usuario: email,
+      motivo:        motivo_consulta || '',
     });
-    google_evento_id_creado = eventoGoogle.evento_id; // Guardamos el ID por si necesitamos revertir
+    google_evento_id_creado = eventoGoogle.evento_id;
 
-    // Guardamos la cita en la BD con el enlace de Meet ya incluido
+    // 5. Guardar la cita
     await query(
-      `INSERT INTO citas 
+      `INSERT INTO citas
         (usuario_id, disponibilidad_id, motivo_consulta, estado, google_evento_id, enlace_videollamada)
        VALUES (?, ?, ?, 'confirmada', ?, ?)`,
       [user.id, disponibilidad_id, motivo_consulta || '', eventoGoogle.evento_id, eventoGoogle.enlace_meet]
     );
 
-    // Marcamos el hueco como ocupado
+    // 6. Marcar el hueco como ocupado
     await query('UPDATE disponibilidad SET ocupado = 1 WHERE id = ?', [disponibilidad_id]);
 
-    // Envío de correo de notificación a Antonio
+    // 7. Aviso por email a Antonio (si falla, la reserva sigue siendo válida)
     try {
-      // Se crea el transportador aquí para evitar un crash si las variables de entorno no están definidas.
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -80,24 +98,22 @@ export default async function handler(req, res) {
       });
 
       await transporter.sendMail({
-        from: '"Sistema de Citas" <tu-email@gmail.com>',
+        from: `"Sistema de Citas" <${process.env.EMAIL_USER}>`,
         to: 'antonio.es.cantillo@gmail.com',
         subject: 'Nueva reserva de cita',
         html: `
           <h1>Nueva reserva realizada</h1>
-          <p>Se ha reservado una nueva cita:</p>
           <ul>
             <li><b>Usuario:</b> ${nombre_usuario}</li>
             <li><b>Email:</b> ${email}</li>
-            <li><b>Fecha:</b> ${hueco.fecha}</li>
+            <li><b>Fecha:</b> ${fechaTexto}</li>
             <li><b>Hora:</b> ${hueco.hora_inicio}</li>
             <li><b>Motivo:</b> ${motivo_consulta || 'No especificado'}</li>
           </ul>
-        `
+        `,
       });
     } catch (emailErr) {
       console.error('[reservar] Error al enviar email de notificación:', emailErr.message);
-      // No devolvemos error aquí para que el usuario reciba su confirmación aunque falle el email interno
     }
 
     return json(res, 201, {
@@ -109,12 +125,9 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('[reservar]', err.message);
 
-    // --- LÓGICA DE REVERSIÓN ---
-    // Si se creó un evento en Google pero algo falló después, lo cancelamos.
     if (google_evento_id_creado) {
-      console.log(`[reservar] Intentando revertir la creación del evento de Google: ${google_evento_id_creado}`);
-      await cancelarEventoCalendar(google_evento_id_creado).catch(revertErr => {
-        console.error('[reservar] Error crítico al intentar revertir el evento de Google:', revertErr.message);
+      await cancelarEventoCalendar(google_evento_id_creado).catch((revertErr) => {
+        console.error('[reservar] Error al revertir el evento de Google:', revertErr.message);
       });
     }
     return json(res, 500, { error: 'Error al crear la cita: ' + err.message });
