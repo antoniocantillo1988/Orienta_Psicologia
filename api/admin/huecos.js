@@ -8,17 +8,19 @@ export default async function handler(req, res) {
 
     // POST - crear hueco
     if (req.method === 'POST') {
-      const { fecha, hora_inicio, hora_fin, modalidad } = req.body || {};
-      if (!fecha || !hora_inicio || !hora_fin) {
-        return json(res, 400, { error: 'Fecha, hora inicio y hora fin son obligatorios.' });
+      const { fecha, hora_inicio, hora_fin, modalidad, sede_cita } = req.body || {};
+      if (!fecha || !hora_inicio || !hora_fin || !sede_cita) {
+        return json(res, 400, { error: 'Fecha, horas y sede son obligatorios.' });
       }
       if (hora_fin <= hora_inicio) {
         return json(res, 400, { error: 'La hora de fin debe ser posterior a la de inicio.' });
       }
-      // CORREGIDO: 4 columnas → 4 marcadores (antes había solo 3 "?" y daba error SQL)
+      if (!['malaga', 'cordoba'].includes(sede_cita)) {
+        return json(res, 400, { error: 'Sede no válida.' });
+      }
       await query(
-        'INSERT INTO disponibilidad (fecha, hora_inicio, hora_fin, modalidad) VALUES (?, ?, ?, ?)',
-        [fecha, hora_inicio, hora_fin, modalidad === 'online' ? 'online' : 'presencial']
+        'INSERT INTO disponibilidad (fecha, hora_inicio, hora_fin, modalidad, sede_cita) VALUES (?, ?, ?, ?, ?)',
+        [fecha, hora_inicio, hora_fin, modalidad === 'online' ? 'online' : 'domicilio', sede_cita]
       );
       return json(res, 201, { ok: true });
     }
