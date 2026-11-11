@@ -8,7 +8,9 @@ import {
   Info, ClipboardList, FileText, FolderOpen,
 } from 'lucide-react';
 //Popout para el formulario:
-import FeedbackPopout from './components/FeedbackPopout';
+
+// Correcto (busca src/components/FeedbackPopout.jsx)
+import FeedbackPopout from './FeedbackPopout';
 
 const AVISO_LEGAL =
   'Aviso Legal: Antonio Cantillo Número de Colegiado en COPAO AO14923 acogido al Código Deontológico de Psicología, a la Política de Protección de datos y privacidad acorde a la LOPD.';
