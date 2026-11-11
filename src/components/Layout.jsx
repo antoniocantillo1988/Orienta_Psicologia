@@ -7,9 +7,11 @@ import {
   CalendarCheck, Users, ShieldCheck, Menu, X, LayoutDashboard,
   Info, ClipboardList, FileText, FolderOpen,
 } from 'lucide-react';
+//Popout para el formulario:
+import FeedbackPopout from './components/FeedbackPopout';
 
 const AVISO_LEGAL =
-  'Aviso Legal: Antonio Cantillo 74944739K acogido a la Política de Protección de datos y privacidad acorde a la LOPD.';
+  'Aviso Legal: Antonio Cantillo Número de Colegiado en COPAO AO14923 acogido al Código Deontológico de Psicología, a la Política de Protección de datos y privacidad acorde a la LOPD.';
 
 function NavItem({ to, icon: Icon, children, onClick, end = false }) {
   return (
@@ -194,6 +196,8 @@ export default function Layout({ children }) {
           <p className="mt-2 text-xs text-stone-400">© {new Date().getFullYear()} Orienta Psicología</p>
         </footer>
       </div>
+      {/* Popout de opinión */}
+      <FeedbackPopout />
     </div>
   );
 }
