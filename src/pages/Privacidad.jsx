@@ -12,7 +12,7 @@ export default function Privacidad() {
       <h2 className="pt-2 text-lg font-bold text-tierra-800">1. Responsable del tratamiento</h2>
       <p>
         Antonio Cantillo Rueda, psicólogo colegiado (COPAO nº AO14923).
-        Domicilio: c/Praga, nº9. Contacto: info@orientapsicologia.es. Sitio web: www.orientapsicologia.es.
+        Contacto: info@orientapsicologia.es. Sitio web: www.orientapsicologia.es.
       </p>
 
       <h2 className="pt-2 text-lg font-bold text-tierra-800">2. Datos que recogemos</h2>
