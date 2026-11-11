@@ -16,6 +16,7 @@ import Register from './pages/Register';
 import AdminCitas from './pages/AdminCitas';
 import AdminUsuarios from './pages/AdminUsuarios';
 import AcercaDe from './pages/AcercaDe';
+import Privacidad from './pages/Privacidad';
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/acerca-de" element={<AcercaDe />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />
+            <Route path="/privacidad" element={<Privacidad />} />
 
             {/* Requieren sesión */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

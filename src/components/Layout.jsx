@@ -13,7 +13,7 @@ import {
 import FeedbackPopout from './FeedbackPopout';
 
 const AVISO_LEGAL =
-  'Aviso Legal: Antonio Cantillo Número de Colegiado en COPAO AO14923 acogido al Código Deontológico de Psicología, a la Política de Protección de datos y privacidad acorde a la LOPD.';
+  'Aviso Legal: Antonio Cantillo Rueda, con número de Colegiado COPAO AO14923 acogido al Código Deontológico de Psicología, a la Política de Protección de datos y privacidad acorde a la LOPD.';
 
 function NavItem({ to, icon: Icon, children, onClick, end = false }) {
   return (
@@ -194,8 +194,16 @@ export default function Layout({ children }) {
 
         {/* Pie de página */}
         <footer className="border-t border-crema-200 bg-crema-100 px-6 py-6 text-center">
-          <p className="mx-auto max-w-3xl text-xs leading-relaxed text-stone-500">{AVISO_LEGAL}</p>
-          <p className="mt-2 text-xs text-stone-400">© {new Date().getFullYear()} Orienta Psicología</p>
+          <p className="mx-auto max-w-3xl text-xs leading-relaxed text-stone-500">
+            {AVISO_LEGAL}{' '}
+            <Link to="/privacidad" className="font-medium text-sage-700 underline hover:text-sage-900">
+              Ver más
+            </Link>
+          </p>
+          <p className="mt-2 text-xs text-stone-400">
+            <Link to="/privacidad" className="underline hover:text-sage-700">Política de privacidad</Link>
+            {' · '}© {new Date().getFullYear()} Orienta Psicología
+          </p>
         </footer>
       </div>
       {/* Popout de opinión */}
