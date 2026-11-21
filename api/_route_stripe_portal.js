@@ -1,5 +1,5 @@
-import { json, query, requireAuth } from '../_db.js';
-import { getAppUrl, stripeRequest } from './_helpers.js';
+import { json, query, requireAuth } from './_db.js';
+import { getAppUrl, stripeRequest } from './stripe/_helpers.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'Método no permitido.' });

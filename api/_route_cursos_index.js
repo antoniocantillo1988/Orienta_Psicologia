@@ -1,4 +1,4 @@
-import { json, query, verifyToken } from '../_db.js';
+import { json, query, verifyToken } from './_db.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return json(res, 405, { error: 'Método no permitido.' });

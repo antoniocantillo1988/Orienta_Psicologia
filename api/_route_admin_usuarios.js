@@ -1,6 +1,6 @@
 // api/admin/usuarios.js
 // Gestión de usuarios (solo administradores, tipo = 1)
-import { query, json, requireAdmin } from '../_db.js';
+import { query, json, requireAdmin } from './_db.js';
 
 export default async function handler(req, res) {
   try {

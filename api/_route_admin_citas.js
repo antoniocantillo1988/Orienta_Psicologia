@@ -1,6 +1,6 @@
 // api/admin/citas.js
-import { query, json, requireAdmin } from '../_db.js';
-import { cancelarEventoCalendar } from '../_calendar.js';
+import { query, json, requireAdmin } from './_db.js';
+import { cancelarEventoCalendar } from './_calendar.js';
 
 const ESTADOS = ['pendiente', 'confirmada', 'cancelada', 'completada'];
 

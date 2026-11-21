@@ -1,5 +1,5 @@
 // api/auth/login.js
-import { query, json, verifyPassword, hashPassword, createToken } from '../_db.js';
+import { query, json, verifyPassword, hashPassword, createToken } from './_db.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'Método no permitido' });
