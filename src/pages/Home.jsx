@@ -71,7 +71,7 @@ export default function Home() {
       <section className="relative isolate flex min-h-[38rem] items-end overflow-hidden rounded-3xl shadow-suave sm:min-h-[34rem]">
         <img src="/foto-sala.jpg" alt="Espacio de consulta de Orienta Psicología" className="absolute inset-0 -z-20 h-full w-full object-cover" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-tierra-800/75 via-tierra-800/20 to-transparent" />
-        <div className="m-4 max-w-3xl rounded-3xl border border-white/70 bg-white/90 p-6 shadow-suave backdrop-blur-sm sm:m-8 sm:p-9">
+        <div className="m-4 max-w-3xl rounded-3xl border border-white/50 bg-white/55 p-6 shadow-suave backdrop-blur-md sm:m-8 sm:p-9">
           <h2 className="font-serif text-2xl font-bold text-tierra-800 sm:text-3xl">
             No tienes que cargar con todo solo o sola.
           </h2>
