@@ -12,11 +12,15 @@
     { "source": "/api/cursos/mis-cursos", "destination": "/api/cursos?route=mis-cursos" },
     { "source": "/api/cursos/contenido", "destination": "/api/cursos?route=contenido" },
     { "source": "/api/cursos/progreso", "destination": "/api/cursos?route=progreso" },
+    { "source": "/api/cursos/recordatorios", "destination": "/api/cursos?route=recordatorios" },
     { "source": "/api/stripe/checkout", "destination": "/api/stripe?route=checkout" },
     { "source": "/api/stripe/portal", "destination": "/api/stripe?route=portal" },
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
+  ],
+  "crons": [
+    { "path": "/api/cursos/recordatorios", "schedule": "0 8 * * *" }
   ]
 }

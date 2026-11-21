@@ -1,5 +1,6 @@
 import { json, query, requireAuth } from './_db.js';
 import { positiveInteger } from './stripe/_helpers.js';
+import { enviarConfirmacionCurso } from './_email_cursos.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'Método no permitido.' });
@@ -12,7 +13,7 @@ export default async function handler(req, res) {
 
   try {
     const [curso] = await query(
-      'SELECT id, tipo_acceso FROM cursos WHERE id = ? AND publicado = 1',
+      'SELECT id, titulo, tipo_acceso FROM cursos WHERE id = ? AND publicado = 1',
       [cursoId]
     );
     if (!curso) return json(res, 404, { error: 'El curso no está disponible.' });
@@ -33,6 +34,23 @@ export default async function handler(req, res) {
          stripe_subscription_id = NULL`,
       [user.id, cursoId]
     );
+
+    try {
+      const [[usuario], [inscripcion]] = await Promise.all([
+        query('SELECT email, nombre_usuario FROM usuarios WHERE id = ?', [user.id]),
+        query('SELECT id, fecha_inicio FROM inscripciones WHERE usuario_id = ? AND curso_id = ?', [user.id, cursoId]),
+      ]);
+      await enviarConfirmacionCurso({
+        usuarioId: user.id,
+        cursoId,
+        email: usuario?.email,
+        nombre: usuario?.nombre_usuario,
+        curso,
+        periodo: `alta-${inscripcion?.id}-${inscripcion?.fecha_inicio}`,
+      });
+    } catch (emailError) {
+      console.error('[cursos/inscribirse] No se pudo encolar el correo de inscripción:', emailError.message);
+    }
 
     return json(res, 200, { ok: true });
   } catch (error) {

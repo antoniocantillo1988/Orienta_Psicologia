@@ -4,6 +4,7 @@ import inscribirse from './_route_cursos_inscribirse.js';
 import misCursos from './_route_cursos_mis_cursos.js';
 import contenido from './_route_cursos_contenido.js';
 import progreso from './_route_cursos_progreso.js';
+import recordatorios from './_route_cursos_recordatorios.js';
 
 const routes = {
   index: catalogo,
@@ -11,6 +12,7 @@ const routes = {
   'mis-cursos': misCursos,
   contenido,
   progreso,
+  recordatorios,
 };
 
 export default async function handler(req, res) {

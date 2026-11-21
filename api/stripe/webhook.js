@@ -5,6 +5,7 @@ import {
   stripeRequest,
   verifyStripeSignature,
 } from './_helpers.js';
+import { enviarConfirmacionCurso } from '../_email_cursos.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -73,6 +74,26 @@ async function handleEvent(event) {
       subscriptionId,
       end,
     });
+    if (status === 'activa') {
+      try {
+        const [datos] = await query(
+          `SELECT u.email, u.nombre_usuario, c.titulo, c.duracion_horas
+           FROM usuarios u JOIN cursos c ON c.id = ? WHERE u.id = ?`,
+          [courseId, userId]
+        );
+        if (datos) await enviarConfirmacionCurso({
+          usuarioId: userId,
+          cursoId,
+          email: datos.email,
+          nombre: datos.nombre_usuario,
+          curso: datos,
+          periodo: `stripe-${object.id}`,
+          fechaFin: end ? new Date(end * 1000).toISOString() : null,
+        });
+      } catch (emailError) {
+        console.error('[stripe/webhook] No se pudo encolar el correo de inscripción:', emailError.message);
+      }
+    }
     return;
   }
 

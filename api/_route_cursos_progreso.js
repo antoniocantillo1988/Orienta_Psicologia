@@ -1,4 +1,5 @@
 import { json, query, requireAuth } from './_db.js';
+import { enviarCertificadoCurso } from './_email_cursos.js';
 
 function enteroPositivo(value) {
   const number = Number(value);
@@ -33,6 +34,11 @@ export default async function handler(req, res) {
     );
     if (!contenido) return json(res, 403, { error: 'No tienes acceso a este contenido.' });
 
+    const [inscripcionInicial] = await query(
+      'SELECT fecha_finalizacion FROM inscripciones WHERE usuario_id = ? AND curso_id = ?',
+      [user.id, contenido.curso_id]
+    );
+
     await query(
       `INSERT INTO curso_progreso (usuario_id, contenido_id, completado, respuesta, fecha_completado)
        VALUES (?, ?, ?, ?, IF(? = 1, NOW(), NULL))
@@ -63,6 +69,31 @@ export default async function handler(req, res) {
        WHERE usuario_id = ? AND curso_id = ? AND estado = 'activa'`,
       [finalizado ? 1 : 0, user.id, contenido.curso_id]
     );
+
+    if (finalizado && !inscripcionInicial?.fecha_finalizacion) {
+      try {
+        const [datos] = await query(
+          `SELECT u.email, u.nombre_usuario, c.id AS curso_id, c.titulo,
+                  c.duracion_horas, i.fecha_finalizacion
+           FROM inscripciones i
+           JOIN usuarios u ON u.id = i.usuario_id
+           JOIN cursos c ON c.id = i.curso_id
+           WHERE i.usuario_id = ? AND i.curso_id = ?`,
+          [user.id, contenido.curso_id]
+        );
+        if (datos?.fecha_finalizacion) await enviarCertificadoCurso({
+          usuarioId: user.id,
+          cursoId: datos.curso_id,
+          email: datos.email,
+          nombre: datos.nombre_usuario,
+          curso: datos,
+          periodo: `final-${datos.fecha_finalizacion}`,
+          fechaFin: datos.fecha_finalizacion,
+        });
+      } catch (emailError) {
+        console.error('[cursos/progreso] No se pudo encolar el certificado por correo:', emailError.message);
+      }
+    }
 
     return json(res, 200, { ok: true, porcentaje, completados, total_actividades: total, finalizado });
   } catch (error) {

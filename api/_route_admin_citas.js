@@ -1,6 +1,7 @@
 // api/admin/citas.js
 import { query, json, requireAdmin } from './_db.js';
 import { cancelarEventoCalendar } from './_calendar.js';
+import { enviarActualizacionCita, enviarCancelacionCita } from './_email_cursos.js';
 
 const ESTADOS = ['pendiente', 'confirmada', 'cancelada', 'completada'];
 
@@ -31,7 +32,12 @@ export default async function handler(req, res) {
       }
 
       const [cita] = await query(
-        'SELECT id, estado, disponibilidad_id, google_evento_id, enlace_videollamada FROM citas WHERE id = ?',
+        `SELECT c.id, c.usuario_id, c.estado, c.disponibilidad_id, c.google_evento_id,
+                c.enlace_videollamada, u.email, u.nombre_usuario,
+                d.fecha, d.hora_inicio, d.modalidad, d.sede_cita
+         FROM citas c JOIN usuarios u ON u.id = c.usuario_id
+         JOIN disponibilidad d ON d.id = c.disponibilidad_id
+         WHERE c.id = ?`,
         [cita_id]
       );
       if (!cita) return json(res, 404, { error: 'Cita no encontrada.' });
@@ -58,6 +64,24 @@ export default async function handler(req, res) {
         nuevoEnlace,
         cita_id,
       ]);
+
+      try {
+        if (nuevoEstado === 'cancelada' && cita.estado !== 'cancelada') {
+          await enviarCancelacionCita({
+            usuarioId: cita.usuario_id, citaId: cita.id, email: cita.email,
+            nombre: cita.nombre_usuario, fecha: cita.fecha, hora: cita.hora_inicio,
+          });
+        } else if (nuevoEstado === 'confirmada'
+          && (cita.estado !== 'confirmada' || nuevoEnlace !== cita.enlace_videollamada)) {
+          await enviarActualizacionCita({
+            usuarioId: cita.usuario_id, citaId: cita.id, email: cita.email,
+            nombre: cita.nombre_usuario, fecha: cita.fecha, hora: cita.hora_inicio,
+            modalidad: cita.modalidad, sede: cita.sede_cita, enlace: nuevoEnlace,
+          });
+        }
+      } catch (emailError) {
+        console.error('[admin/citas] No se pudo encolar el email de actualización:', emailError.message);
+      }
       return json(res, 200, { ok: true });
     }
 
@@ -67,7 +91,11 @@ export default async function handler(req, res) {
       if (!cita_id) return json(res, 400, { error: 'Falta cita_id.' });
 
       const [cita] = await query(
-        'SELECT estado, disponibilidad_id, google_evento_id FROM citas WHERE id = ?',
+        `SELECT c.id, c.usuario_id, c.estado, c.disponibilidad_id, c.google_evento_id,
+                u.email, u.nombre_usuario, d.fecha, d.hora_inicio
+         FROM citas c JOIN usuarios u ON u.id = c.usuario_id
+         JOIN disponibilidad d ON d.id = c.disponibilidad_id
+         WHERE c.id = ?`,
         [cita_id]
       );
       if (!cita) return json(res, 404, { error: 'Cita no encontrada.' });
@@ -80,6 +108,16 @@ export default async function handler(req, res) {
       await query('DELETE FROM citas WHERE id = ?', [cita_id]);
       // CORREGIDO: antes se usaba cita_id como id de disponibilidad (borraba el hueco equivocado)
       await query('UPDATE disponibilidad SET ocupado = 0 WHERE id = ?', [cita.disponibilidad_id]);
+      if (cita.estado !== 'cancelada') {
+        try {
+          await enviarCancelacionCita({
+            usuarioId: cita.usuario_id, citaId: cita.id, email: cita.email,
+            nombre: cita.nombre_usuario, fecha: cita.fecha, hora: cita.hora_inicio,
+          });
+        } catch (emailError) {
+          console.error('[admin/citas] No se pudo encolar el email de cancelación:', emailError.message);
+        }
+      }
       return json(res, 200, { ok: true });
     }
 

@@ -23,7 +23,12 @@ export default function Dashboard() {
           setMembresia(data.membresia || { activa: false, valida_hasta: null });
         }
       })
-      .catch((err) => { if (activo) setError(err.message || 'No se pudo cargar tu formación.'); })
+      .catch((err) => {
+        if (activo) {
+          setError(err.message || 'No se pudo cargar tu formación.');
+          setMembresia({ error: true });
+        }
+      })
       .finally(() => { if (activo) setCargando(false); });
     return () => { activo = false; };
   }, []);
@@ -46,7 +51,11 @@ export default function Dashboard() {
             <GraduationCap size={15} /> Campus Orienta
           </span>
           <h1 className="mt-5 font-serif text-3xl font-bold sm:text-5xl">Hola, {user?.nombre_usuario}</h1>
-          {membresia?.activa ? (
+          {membresia === null ? (
+            <p className="mt-3 text-sm text-white/80">Comprobando el estado de tu membresía…</p>
+          ) : membresia.error ? (
+            <p className="mt-3 text-sm text-white/80">No pudimos comprobar ahora tu membresía. Inténtalo de nuevo en unos minutos.</p>
+          ) : membresia.activa ? (
             <p className="mt-4 inline-flex flex-wrap items-center gap-2 rounded-full border border-oro-200/40 bg-oro-100/15 px-4 py-2 text-sm font-semibold text-white sm:text-base">
               <Sparkles size={17} className="text-oro-200" /> Usuario Premium · Membresía válida hasta {String(membresia.valida_hasta).slice(8, 10)}/{String(membresia.valida_hasta).slice(5, 7)}/{String(membresia.valida_hasta).slice(0, 4)}
             </p>

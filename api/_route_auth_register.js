@@ -1,5 +1,6 @@
 // api/auth/register.js
 import { query, json, hashPassword, createToken } from './_db.js';
+import { enviarBienvenidaUsuario } from './_email_cursos.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'Método no permitido' });
@@ -27,6 +28,16 @@ export default async function handler(req, res) {
     );
 
     const token = createToken({ id: result.insertId, email: email.toLowerCase(), tipo: 0 });
+
+    try {
+      await enviarBienvenidaUsuario({
+        usuarioId: result.insertId,
+        email: email.toLowerCase(),
+        nombre: nombre_usuario.trim(),
+      });
+    } catch (emailError) {
+      console.error('[register] No se pudo encolar el correo de bienvenida:', emailError.message);
+    }
 
     return json(res, 201, {
       token,
