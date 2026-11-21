@@ -1,7 +1,7 @@
 // src/pages/Dashboard.jsx
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, MessageSquare, Brain, BookOpen, CalendarCheck, Users } from 'lucide-react';
+import { Calendar, MessageSquare, BookOpen, CalendarCheck, Users } from 'lucide-react';
 
 const modulos = [
   {
@@ -19,14 +19,6 @@ const modulos = [
     titulo: 'Chat de apoyo 24h',
     desc: 'Orientación psicoeducativa con IA. Resuelve dudas sobre el desarrollo de tu hijo/a.',
     accion: 'Abrir chat',
-  },
-  {
-    to: '/braintrain',
-    icon: Brain,
-    iconColor: 'text-oro-600 bg-oro-100',
-    titulo: 'Brain Train',
-    desc: 'Cuestionario de desarrollo neuropsicológico para niños de 0 a 6 años.',
-    accion: 'Iniciar evaluación',
   },
   {
     to: '/talleres',
