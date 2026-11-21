@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     const cursos = user
       ? await query(
           `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
-                  c.precio, c.moneda, i.estado AS inscripcion_estado
+                  c.precio, c.moneda, c.duracion_horas, i.estado AS inscripcion_estado
            FROM cursos c
            LEFT JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = ?
            WHERE c.publicado = 1
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
           [user.id]
         )
       : await query(
-          `SELECT id, titulo, descripcion, categoria, tipo_acceso, precio, moneda,
+          `SELECT id, titulo, descripcion, categoria, tipo_acceso, precio, moneda, duracion_horas,
                   NULL AS inscripcion_estado
            FROM cursos
            WHERE publicado = 1

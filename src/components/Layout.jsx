@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   MessageSquare, BookOpen, Calendar, Home, LogOut, Phone,
   CalendarCheck, Users, ShieldCheck, Menu, X, LayoutDashboard,
-  Info, ClipboardList, FileText, FolderOpen,
+  Info, ClipboardList, FileText, FolderOpen, GraduationCap,
 } from 'lucide-react';
 //Popout para el formulario:
 
@@ -95,6 +95,7 @@ function MenuLateral({ onNavigate }) {
             <div className="space-y-1">
               <NavItem to="/admin/citas" icon={CalendarCheck} onClick={onNavigate}>Modificar citas</NavItem>
               <NavItem to="/admin/usuarios" icon={Users} onClick={onNavigate}>Modificar usuarios</NavItem>
+              <NavItem to="/admin/talleres" icon={GraduationCap} onClick={onNavigate}>Modificar Talleres</NavItem>
             </div>
           </div>
         )}

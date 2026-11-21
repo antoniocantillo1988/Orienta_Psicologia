@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   BookOpen,
   CheckCircle2,
+  Clock3,
   CreditCard,
   HeartHandshake,
   LoaderCircle,
@@ -204,20 +205,22 @@ export default function Talleres() {
                   )}
                   <h3 className="mt-2 font-serif text-xl font-bold text-tierra-800">{curso.titulo}</h3>
                   {curso.descripcion && <p className="mt-2 flex-1 text-sm leading-6 text-stone-600">{curso.descripcion}</p>}
+                  {curso.duracion_horas && <p className="mt-3 flex items-center gap-1.5 text-xs text-stone-500"><Clock3 size={14} /> Duración estimada: {curso.duracion_horas} h</p>}
 
                   <div className="mt-6 flex items-center justify-between gap-3 border-t border-crema-200 pt-4">
                     <span className="font-semibold text-tierra-800">{precioCurso(curso)}</span>
                     {inscrita ? (
-                      curso.tipo_acceso === 'membresia' ? (
-                        <button type="button" className="btn-outline" onClick={gestionarMembresia} disabled={accion === 'portal'}>
-                          {accion === 'portal' ? <LoaderCircle size={16} className="animate-spin" /> : <CreditCard size={16} />}
-                          Gestionar membresía
-                        </button>
-                      ) : (
-                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-sage-700">
-                          <CheckCircle2 size={17} aria-hidden="true" /> Inscrito
-                        </span>
-                      )
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {curso.tipo_acceso === 'membresia' && (
+                          <button type="button" className="btn-outline" onClick={gestionarMembresia} disabled={accion === 'portal'}>
+                            {accion === 'portal' ? <LoaderCircle size={16} className="animate-spin" /> : <CreditCard size={16} />}
+                            Gestionar membresía
+                          </button>
+                        )}
+                        <Link to={`/cursos/${curso.id}`} className="btn-primary">
+                          <BookOpen size={16} aria-hidden="true" /> Acceder al curso
+                        </Link>
+                      </div>
                     ) : (
                       user ? (
                         <button type="button" className="btn-primary" onClick={() => inscribirse(curso)} disabled={Boolean(accion)}>
