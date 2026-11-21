@@ -9,11 +9,22 @@ import { api } from '../lib/api';
 function youtubeEmbed(enlace) {
   try {
     const url = new URL(enlace);
+    const host = url.hostname.toLowerCase();
+    const esYoutube = host === 'youtu.be'
+      || host.endsWith('.youtu.be')
+      || host === 'youtube.com'
+      || host.endsWith('.youtube.com')
+      || host === 'youtube-nocookie.com'
+      || host.endsWith('.youtube-nocookie.com');
+    if (!esYoutube) return null;
+
     let id = '';
-    if (url.hostname.endsWith('youtu.be')) id = url.pathname.split('/').filter(Boolean)[0] || '';
-    else if (url.pathname.startsWith('/embed/')) id = url.pathname.split('/')[2] || '';
+    const partes = url.pathname.split('/').filter(Boolean);
+    if (host === 'youtu.be' || host.endsWith('.youtu.be')) id = partes[0] || '';
+    else if (partes[0] === 'watch') id = url.searchParams.get('v') || '';
+    else if (['embed', 'shorts', 'live', 'v'].includes(partes[0])) id = partes[1] || '';
     else id = url.searchParams.get('v') || '';
-    if (!/^[w-]{11}$/.test(id)) return null;
+    if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return null;
     return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1`;
   } catch {
     return null;

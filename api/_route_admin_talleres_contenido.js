@@ -34,9 +34,9 @@ function validarEnlace(tipo, enlace) {
   if (!enlace) throw new Error('Añade el enlace del contenido.');
 
   let enlaceLimpio = enlace.trim();
-  if (tipo === 'cuestionario') {
-    // Microsoft Forms ofrece un bloque iframe; solo guardamos su atributo src,
-    // nunca el HTML suministrado por el navegador.
+  if (['cuestionario', 'video'].includes(tipo)) {
+    // Algunos administradores pegan el bloque iframe del proveedor; guardamos
+    // únicamente su atributo src, nunca el HTML suministrado por el navegador.
     const iframeSrc = enlaceLimpio.match(/<iframe\b[^>]*\bsrc\s*=\s*(["'])(.*?)\1/i);
     if (iframeSrc) enlaceLimpio = iframeSrc[2].trim();
   }
@@ -50,7 +50,10 @@ function validarEnlace(tipo, enlace) {
   if (parsed.protocol !== 'https:') throw new Error('El enlace debe comenzar por https://.');
 
   const host = parsed.hostname.toLowerCase();
-  if (tipo === 'video' && !['youtube.com', 'www.youtube.com', 'youtu.be', 'www.youtu.be', 'youtube-nocookie.com', 'www.youtube-nocookie.com'].includes(host)) {
+  const dominioYoutubeValido = [
+    'youtube.com', 'youtu.be', 'youtube-nocookie.com',
+  ].some((dominio) => host === dominio || host.endsWith(`.${dominio}`));
+  if (tipo === 'video' && !dominioYoutubeValido) {
     throw new Error('Para vídeos, pega un enlace de YouTube.');
   }
   const dominioFormsValido = [
