@@ -8,7 +8,16 @@ export default async function handler(req, res) {
     const cursos = user
       ? await query(
           `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
-                  c.precio, c.moneda, c.duracion_horas, i.estado AS inscripcion_estado
+                  c.precio, c.moneda, c.duracion_horas,
+                  CASE
+                    WHEN i.estado = 'activa' AND (
+                      c.tipo_acceso = 'gratis'
+                      OR (c.tipo_acceso = 'pago' AND i.stripe_checkout_session_id IS NOT NULL)
+                      OR (c.tipo_acceso = 'membresia' AND i.stripe_subscription_id IS NOT NULL AND i.fecha_fin > NOW())
+                    ) THEN 'activa'
+                    WHEN i.estado IN ('activa', 'pendiente') THEN 'pendiente'
+                    ELSE i.estado
+                  END AS inscripcion_estado
            FROM cursos c
            LEFT JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = ?
            WHERE c.publicado = 1

@@ -32,12 +32,37 @@ export default async function handler(req, res) {
     }
 
     const [inscripcion] = await query(
-      `SELECT estado, stripe_checkout_session_id
+      `SELECT estado, stripe_checkout_session_id, stripe_subscription_id,
+              (fecha_fin IS NOT NULL AND fecha_fin > NOW()) AS periodo_vigente
        FROM inscripciones WHERE usuario_id = ? AND curso_id = ?`,
       [usuario.id, cursoId]
     );
-    if (inscripcion?.estado === 'activa') {
+    if (curso.tipo_acceso === 'pago'
+        && inscripcion?.estado === 'activa'
+        && inscripcion.stripe_checkout_session_id) {
       return json(res, 409, { error: 'Ya tienes acceso a este curso.' });
+    }
+
+    if (curso.tipo_acceso === 'membresia'
+        && inscripcion?.stripe_subscription_id
+        && ['activa', 'pendiente'].includes(inscripcion.estado)) {
+      if (inscripcion.estado === 'activa' && Number(inscripcion.periodo_vigente) === 1) {
+        return json(res, 409, { error: 'Tu membresía está al corriente y ya tienes acceso a este curso.' });
+      }
+      const subscription = await stripeRequest(
+        `/subscriptions/${encodeURIComponent(inscripcion.stripe_subscription_id)}`,
+        { method: 'GET' }
+      );
+      if (!['canceled', 'incomplete_expired'].includes(subscription.status)) {
+        const customerId = typeof subscription.customer === 'string'
+          ? subscription.customer
+          : subscription.customer?.id;
+        if (!customerId) throw new Error('Stripe no devolvió el cliente de la suscripción.');
+        const portalParams = new URLSearchParams({ customer: customerId, return_url: `${getAppUrl()}/talleres` });
+        const portal = await stripeRequest('/billing_portal/sessions', { body: portalParams });
+        if (!portal.url) throw new Error('Stripe no devolvió el enlace para actualizar el pago.');
+        return json(res, 200, { url: portal.url, action: 'actualizar_pago' });
+      }
     }
 
     if (inscripcion?.estado === 'pendiente' && inscripcion.stripe_checkout_session_id) {
@@ -49,6 +74,12 @@ export default async function handler(req, res) {
         if (anterior.status === 'open' && anterior.url) {
           return json(res, 200, { url: anterior.url });
         }
+        if (anterior.status === 'complete'
+            && ['paid', 'no_payment_required', 'unpaid'].includes(anterior.payment_status)) {
+          return json(res, 409, {
+            error: 'Stripe ya recibió esta operación. Estamos confirmando el pago; espera unos segundos antes de volver a intentarlo.',
+          });
+        }
       } catch (error) {
         console.warn('[stripe/checkout] No se pudo reutilizar la sesión pendiente:', error.message);
       }
@@ -58,7 +89,7 @@ export default async function handler(req, res) {
     const mode = curso.tipo_acceso === 'membresia' ? 'subscription' : 'payment';
     const params = new URLSearchParams({
       mode,
-      success_url: `${appUrl}/talleres?pago=correcto`,
+      success_url: `${appUrl}/talleres?pago=correcto&curso_id=${curso.id}`,
       cancel_url: `${appUrl}/talleres?pago=cancelado`,
       client_reference_id: `${usuario.id}:${curso.id}`,
       customer_email: usuario.email,

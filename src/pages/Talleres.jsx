@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowUpRight,
@@ -44,6 +44,7 @@ export default function Talleres() {
   const [error, setError] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [accion, setAccion] = useState('');
+  const checkoutProcesado = useRef(false);
 
   const cargarCursos = useCallback(async () => {
     setError('');
@@ -70,9 +71,47 @@ export default function Talleres() {
     }
   }, [searchParams, cargarCursos]);
 
+  useEffect(() => {
+    const cursoId = Number(searchParams.get('curso_id'));
+    if (searchParams.get('pago') !== 'correcto' || !cursoId || !user) return undefined;
+    let activo = true;
+    let intento = 0;
+    let temporizador;
+    const comprobar = async () => {
+      try {
+        const data = await api.get('/cursos');
+        const curso = (data.cursos || []).find((item) => Number(item.id) === cursoId);
+        if (activo && curso?.inscripcion_estado === 'activa') {
+          navigate(`/cursos/${cursoId}`, { replace: true });
+          return;
+        }
+      } catch {
+        // Se reintenta mientras llega la confirmación de Stripe.
+      }
+      intento += 1;
+      if (activo && intento < 15) temporizador = window.setTimeout(comprobar, 2000);
+      else if (activo) setMensaje('El pago se recibió, pero Stripe aún no ha confirmado el acceso. Espera un momento y actualiza la inscripción.');
+    };
+    temporizador = window.setTimeout(comprobar, 1200);
+    return () => { activo = false; window.clearTimeout(temporizador); };
+  }, [searchParams, user, navigate]);
+
+  useEffect(() => {
+    const cursoSolicitado = Number(searchParams.get('checkout'));
+    if (!user || loading || !cursoSolicitado || checkoutProcesado.current) return;
+    const curso = cursos.find((item) => Number(item.id) === cursoSolicitado);
+    if (!curso) return;
+    checkoutProcesado.current = true;
+    if (curso.inscripcion_estado === 'activa') {
+      navigate(`/cursos/${curso.id}`, { replace: true });
+    } else {
+      inscribirse(curso);
+    }
+  }, [user, loading, cursos, searchParams, navigate]);
+
   async function inscribirse(curso) {
     if (!user) {
-      navigate('/login');
+      navigate('/login', { state: { from: { pathname: '/talleres', search: `?checkout=${curso.id}` } } });
       return;
     }
 
@@ -228,7 +267,7 @@ export default function Talleres() {
                           {curso.tipo_acceso === 'gratis' ? 'Inscribirme gratis' : curso.tipo_acceso === 'membresia' ? 'Suscribirme' : 'Comprar curso'}
                         </button>
                       ) : (
-                        <Link to="/login" className="btn-primary">
+                        <Link to="/login" state={{ from: { pathname: '/talleres', search: `?checkout=${curso.id}` } }} className="btn-primary">
                           <CreditCard size={16} aria-hidden="true" /> Iniciar sesión
                         </Link>
                       )

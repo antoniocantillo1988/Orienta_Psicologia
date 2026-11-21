@@ -2,6 +2,7 @@ import { json, query } from '../_db.js';
 import {
   positiveInteger,
   readRawBody,
+  stripeRequest,
   verifyStripeSignature,
 } from './_helpers.js';
 
@@ -16,6 +17,13 @@ function subscriptionIdFromInvoice(invoice) {
   const id = invoice.subscription
     || invoice.parent?.subscription_details?.subscription;
   return typeof id === 'string' ? id : id?.id || null;
+}
+
+function subscriptionPeriodEnd(subscription) {
+  const itemEnds = (subscription.items?.data || [])
+    .map((item) => unixTime(item.current_period_end))
+    .filter(Boolean);
+  return unixTime(subscription.current_period_end) || (itemEnds.length ? Math.max(...itemEnds) : null);
 }
 
 async function saveEnrollment({ userId, courseId, status, checkoutId = null, subscriptionId = null, end = null }) {
@@ -38,7 +46,7 @@ async function handleEvent(event) {
   const object = event.data?.object;
   if (!object) return;
 
-  if (event.type === 'checkout.session.completed') {
+  if (['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)) {
     if (!['paid', 'no_payment_required'].includes(object.payment_status)) return;
     const userId = positiveInteger(object.metadata?.usuario_id);
     const courseId = positiveInteger(object.metadata?.curso_id);
@@ -47,13 +55,33 @@ async function handleEvent(event) {
     const subscriptionId = typeof object.subscription === 'string'
       ? object.subscription
       : object.subscription?.id || null;
+    let end = null;
+    let status = 'activa';
+    if (subscriptionId) {
+      const subscription = await stripeRequest(
+        `/subscriptions/${encodeURIComponent(subscriptionId)}`,
+        { method: 'GET' }
+      );
+      if (!['active', 'trialing'].includes(subscription.status)) status = 'pendiente';
+      end = subscriptionPeriodEnd(subscription);
+    }
     await saveEnrollment({
       userId,
       courseId,
-      status: 'activa',
+      status,
       checkoutId: object.id,
       subscriptionId,
+      end,
     });
+    return;
+  }
+
+  if (event.type === 'checkout.session.async_payment_failed' && object.id) {
+    await query(
+      `UPDATE inscripciones SET estado = 'cancelada'
+       WHERE stripe_checkout_session_id = ? AND estado = 'pendiente'`,
+      [object.id]
+    );
     return;
   }
 
@@ -72,7 +100,7 @@ async function handleEvent(event) {
       courseId,
       status,
       subscriptionId: object.id,
-      end: unixTime(object.current_period_end || object.ended_at),
+      end: subscriptionPeriodEnd(object) || unixTime(object.ended_at),
     });
     return;
   }
@@ -82,7 +110,8 @@ async function handleEvent(event) {
     if (!subscriptionId) return;
 
     if (event.type === 'invoice.paid') {
-      const periodEnd = unixTime(object.lines?.data?.[0]?.period?.end);
+      const subscriptionLine = object.lines?.data?.find((line) => line.type === 'subscription');
+      const periodEnd = unixTime(subscriptionLine?.period?.end || object.lines?.data?.[0]?.period?.end);
       await query(
         `UPDATE inscripciones
          SET estado = 'activa', fecha_inicio = COALESCE(fecha_inicio, NOW()),

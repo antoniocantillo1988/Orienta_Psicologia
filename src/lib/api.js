@@ -40,7 +40,11 @@ export async function apiFetch(path, options = {}) {
   }
 
   if (!res.ok) {
-    throw new Error(data.error || `Error ${res.status}`);
+    const error = new Error(data.error || `Error ${res.status}`);
+    error.status = res.status;
+    error.code = data.code;
+    error.data = data;
+    throw error;
   }
 
   return data;

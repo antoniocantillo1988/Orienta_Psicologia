@@ -1,10 +1,11 @@
 // src/components/ProtectedRoute.jsx
 // Envuelve rutas privadas: sin sesión → /login; adminOnly → solo tipo 1
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function ProtectedRoute({ children, adminOnly = false }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -14,7 +15,7 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
     );
   }
 
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   if (adminOnly && Number(user.tipo) !== 1) return <Navigate to="/campus" replace />;
 
   return children;

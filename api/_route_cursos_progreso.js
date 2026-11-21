@@ -19,9 +19,15 @@ export default async function handler(req, res) {
     const [contenido] = await query(
       `SELECT cc.id, cc.curso_id, cc.obligatorio
        FROM curso_contenidos cc
+       JOIN cursos c ON c.id = cc.curso_id
        JOIN inscripciones i ON i.curso_id = cc.curso_id
        WHERE cc.id = ? AND cc.publicado = 1
          AND i.usuario_id = ? AND i.estado = 'activa'
+         AND (
+           c.tipo_acceso = 'gratis'
+           OR (c.tipo_acceso = 'pago' AND i.stripe_checkout_session_id IS NOT NULL)
+           OR (c.tipo_acceso = 'membresia' AND i.stripe_subscription_id IS NOT NULL AND i.fecha_fin > NOW())
+         )
        LIMIT 1`,
       [contenidoId, user.id]
     );

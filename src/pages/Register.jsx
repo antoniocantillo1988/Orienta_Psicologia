@@ -1,12 +1,13 @@
 // src/pages/Register.jsx
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 
 export default function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [form, setForm] = useState({
     nombre_usuario: '',
@@ -40,7 +41,7 @@ export default function Register() {
         nombre_usuario: form.nombre_usuario,
       });
       login(data.token, data.user);
-      navigate('/campus');
+      navigate(location.state?.from || '/campus', { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -146,7 +147,7 @@ export default function Register() {
 
         <p className="text-center text-sm text-stone-500 mt-4">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="text-teal-600 hover:underline font-medium">
+          <Link to="/login" state={location.state} className="text-teal-600 hover:underline font-medium">
             Inicia sesión
           </Link>
         </p>

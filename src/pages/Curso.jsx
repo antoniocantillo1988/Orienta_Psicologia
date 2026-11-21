@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft, BookOpen, Check, CheckCircle2, Circle, Clock3, FileText,
@@ -74,6 +74,7 @@ export default function Curso() {
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
   const [aviso, setAviso] = useState('');
+  const redireccionPagoIniciada = useRef(false);
 
   const cargar = useCallback(async () => {
     setError('');
@@ -86,7 +87,25 @@ export default function Curso() {
       });
       window.dispatchEvent(new Event('campus-progress-updated'));
     } catch (err) {
-      setError(err.message || 'No se pudo abrir este curso.');
+      if (err.code === 'ACCESO_REQUERIDO') {
+        if (err.data?.tipo_acceso === 'gratis') {
+          setError(err.message);
+        } else if (!redireccionPagoIniciada.current) {
+          redireccionPagoIniciada.current = true;
+          setError(err.message || 'Abriendo el pago seguro…');
+          try {
+            const pago = err.data?.gestionar_membresia
+              ? await api.post('/stripe/portal', {})
+              : await api.post('/stripe/checkout', { curso_id: Number(id) });
+            if (!pago.url) throw new Error('Stripe no devolvió un enlace de pago.');
+            window.location.assign(pago.url);
+          } catch (errorPago) {
+            setError(`${errorPago.message || 'No se pudo iniciar el pago.'} Puedes volver al catálogo e intentarlo de nuevo.`);
+          }
+        }
+      } else {
+        setError(err.message || 'No se pudo abrir este curso.');
+      }
     } finally {
       setCargando(false);
     }
@@ -125,7 +144,7 @@ export default function Curso() {
   }
 
   if (cargando) return <div className="flex items-center justify-center gap-3 py-24 text-sm text-stone-500"><LoaderCircle className="animate-spin" size={20} /> Cargando tu curso…</div>;
-  if (error) return <div className="mx-auto max-w-3xl"><Link to="/campus" className="inline-flex items-center gap-2 text-sm font-semibold text-sage-700"><ArrowLeft size={16} /> Volver al Campus</Link><div className="card-orienta mt-6 p-6 text-sm text-terracota-700" role="alert">{error}</div></div>;
+  if (error) return <div className="mx-auto max-w-3xl"><Link to="/campus" className="inline-flex items-center gap-2 text-sm font-semibold text-sage-700"><ArrowLeft size={16} /> Volver al Campus</Link><div className="card-orienta mt-6 p-6 text-sm text-terracota-700" role="alert">{error}<div className="mt-4"><Link to="/talleres" className="btn-primary">Ir al catálogo</Link></div></div></div>;
 
   const itemSeleccionado = seleccionado;
   const Icono = iconoContenido(itemSeleccionado?.tipo);

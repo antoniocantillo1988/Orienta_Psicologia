@@ -10,13 +10,19 @@ import { api } from '../lib/api';
 export default function Dashboard() {
   const { user } = useAuth();
   const [cursos, setCursos] = useState([]);
+  const [membresia, setMembresia] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     let activo = true;
     api.get('/cursos/mis-cursos')
-      .then((data) => { if (activo) setCursos(data.cursos || []); })
+      .then((data) => {
+        if (activo) {
+          setCursos(data.cursos || []);
+          setMembresia(data.membresia || { activa: false, valida_hasta: null });
+        }
+      })
       .catch((err) => { if (activo) setError(err.message || 'No se pudo cargar tu formación.'); })
       .finally(() => { if (activo) setCargando(false); });
     return () => { activo = false; };
@@ -40,9 +46,15 @@ export default function Dashboard() {
             <GraduationCap size={15} /> Campus Orienta
           </span>
           <h1 className="mt-5 font-serif text-3xl font-bold sm:text-5xl">Hola, {user?.nombre_usuario}</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80 sm:text-base">
-            Tu formación, tus actividades y tus próximos pasos, reunidos en un mismo espacio.
-          </p>
+          {membresia?.activa ? (
+            <p className="mt-4 inline-flex flex-wrap items-center gap-2 rounded-full border border-oro-200/40 bg-oro-100/15 px-4 py-2 text-sm font-semibold text-white sm:text-base">
+              <Sparkles size={17} className="text-oro-200" /> Usuario Premium · Membresía válida hasta {String(membresia.valida_hasta).slice(8, 10)}/{String(membresia.valida_hasta).slice(5, 7)}/{String(membresia.valida_hasta).slice(0, 4)}
+            </p>
+          ) : (
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80 sm:text-base">
+              Aún no tienes una membresía activa. Tu formación, tus actividades y tus próximos pasos están reunidos en este espacio.
+            </p>
+          )}
         </div>
         <div className="pointer-events-none absolute bottom-7 right-10 hidden text-white/15 sm:block">
           <BookOpen size={105} strokeWidth={1} />
@@ -114,9 +126,15 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                <Link to={`/cursos/${curso.id}`} className="btn-primary mt-5 w-full justify-center">
-                  {Number(curso.porcentaje) === 100 ? 'Volver a ver el curso' : 'Continuar formación'} <ArrowRight size={16} />
-                </Link>
+                {Number(curso.puede_acceder) === 1 ? (
+                  <Link to={`/cursos/${curso.id}`} className="btn-primary mt-5 w-full justify-center">
+                    {Number(curso.porcentaje) === 100 ? 'Volver a ver el curso' : 'Continuar formación'} <ArrowRight size={16} />
+                  </Link>
+                ) : curso.fecha_finalizacion ? (
+                  <Link to="/informes" className="btn-primary mt-5 w-full justify-center">Ver mi certificado <ArrowRight size={16} /></Link>
+                ) : (
+                  <Link to={`/talleres?checkout=${curso.id}`} className="btn-primary mt-5 w-full justify-center">Renovar acceso <ArrowRight size={16} /></Link>
+                )}
               </article>
             ))}
           </div>
