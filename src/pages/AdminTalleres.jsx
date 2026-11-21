@@ -377,8 +377,8 @@ export default function AdminTalleres() {
                     {contenido.tipo !== 'tarea' && (
                       <label className="sm:col-span-2">
                         <span className="mb-1.5 block text-sm font-semibold text-tierra-800">Enlace</span>
-                        <input required type="url" value={contenido.enlace} onChange={(event) => setContenido({ ...contenido, enlace: event.target.value })} className="w-full rounded-xl border border-crema-300 bg-white px-4 py-3 text-sm outline-none focus:border-sage-400" placeholder={tipoSeleccionado?.placeholder} />
-                        <span className="mt-1 block text-xs text-stone-500">{contenido.tipo === 'video' ? 'Pega el enlace normal de YouTube; el campus lo convertirá al formato incrustado.' : contenido.tipo === 'cuestionario' ? 'Pega el enlace de inserción de Microsoft Forms.' : 'El contenido se mostrará dentro del campus.'}</span>
+                        <input required type={contenido.tipo === 'cuestionario' ? 'text' : 'url'} value={contenido.enlace} onChange={(event) => setContenido({ ...contenido, enlace: event.target.value })} className="w-full rounded-xl border border-crema-300 bg-white px-4 py-3 text-sm outline-none focus:border-sage-400" placeholder={tipoSeleccionado?.placeholder} />
+                        <span className="mt-1 block text-xs text-stone-500">{contenido.tipo === 'video' ? 'Pega el enlace normal de YouTube; el campus lo convertirá al formato incrustado.' : contenido.tipo === 'cuestionario' ? 'Pega el enlace de Forms o el código iframe que proporciona Microsoft.' : 'El contenido se mostrará dentro del campus.'}</span>
                       </label>
                     )}
                     <label className="sm:col-span-2">

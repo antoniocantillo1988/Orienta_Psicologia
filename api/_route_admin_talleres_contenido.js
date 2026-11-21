@@ -33,11 +33,19 @@ function validarEnlace(tipo, enlace) {
   if (tipo === 'tarea' && !enlace) return null;
   if (!enlace) throw new Error('Añade el enlace del contenido.');
 
+  let enlaceLimpio = enlace.trim();
+  if (tipo === 'cuestionario') {
+    // Microsoft Forms ofrece un bloque iframe; solo guardamos su atributo src,
+    // nunca el HTML suministrado por el navegador.
+    const iframeSrc = enlaceLimpio.match(/<iframe\b[^>]*\bsrc\s*=\s*(["'])(.*?)\1/i);
+    if (iframeSrc) enlaceLimpio = iframeSrc[2].trim();
+  }
+
   let parsed;
   try {
-    parsed = new URL(enlace);
+    parsed = new URL(enlaceLimpio);
   } catch {
-    throw new Error('El enlace no tiene un formato válido.');
+    throw new Error('Pega el enlace de Microsoft Forms o su código de inserción.');
   }
   if (parsed.protocol !== 'https:') throw new Error('El enlace debe comenzar por https://.');
 
@@ -45,9 +53,16 @@ function validarEnlace(tipo, enlace) {
   if (tipo === 'video' && !['youtube.com', 'www.youtube.com', 'youtu.be', 'www.youtu.be', 'youtube-nocookie.com', 'www.youtube-nocookie.com'].includes(host)) {
     throw new Error('Para vídeos, pega un enlace de YouTube.');
   }
-  if (tipo === 'cuestionario' && !['forms.office.com', 'www.forms.office.com', 'forms.microsoft.com', 'www.forms.microsoft.com', 'forms.office365.us'].includes(host)) {
+  const dominioFormsValido = [
+    'forms.office.com',
+    'forms.microsoft.com',
+    'forms.office365.us',
+    'forms.cloud.microsoft',
+  ].some((dominio) => host === dominio || host.endsWith(`.${dominio}`));
+  if (tipo === 'cuestionario' && !dominioFormsValido) {
     throw new Error('Para cuestionarios, pega un enlace de Microsoft Forms.');
   }
+  if (tipo === 'cuestionario') parsed.searchParams.set('embed', 'true');
   return parsed.toString();
 }
 
