@@ -5,7 +5,11 @@ import { enviarBienvenidaUsuario } from './_email_cursos.js';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'Método no permitido' });
 
-  const { email, password, nombre_usuario } = req.body || {};
+  const { email, password, nombre_usuario, acepta_tratamiento } = req.body || {};
+
+  if (acepta_tratamiento !== true) {
+    return json(res, 400, { error: 'Debes aceptar el tratamiento de datos para crear una cuenta.' });
+  }
   
   if (!email || !password || !nombre_usuario) {
     return json(res, 400, { error: 'Todos los campos son obligatorios.' });
