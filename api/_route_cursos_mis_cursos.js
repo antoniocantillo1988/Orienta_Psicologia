@@ -12,7 +12,7 @@ export default async function handler(req, res) {
               i.fecha_finalizacion, i.estado AS inscripcion_estado
        FROM inscripciones i
        JOIN cursos c ON c.id = i.curso_id
-       WHERE i.usuario_id = ? AND i.estado = 'activa'
+       WHERE i.usuario_id = ? AND (i.estado = 'activa' OR i.fecha_finalizacion IS NOT NULL)
        ORDER BY i.fecha_inicio DESC, c.id DESC`,
       [user.id]
     );

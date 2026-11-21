@@ -1,6 +1,6 @@
 // src/App.jsx
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -45,7 +45,8 @@ export default function App() {
             <Route path="/privacidad" element={<Privacidad />} />
 
             {/* Requieren sesión */}
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/campus" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/campus" replace /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="/tareas" element={<ProtectedRoute><Tareas /></ProtectedRoute>} />
             <Route path="/informes" element={<ProtectedRoute><Informes /></ProtectedRoute>} />

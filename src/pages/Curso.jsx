@@ -84,6 +84,7 @@ export default function Curso() {
         const refreshed = result.contenidos.find((item) => Number(item.id) === Number(actual));
         return refreshed || result.contenidos.find((item) => Number(item.completado) !== 1) || result.contenidos[0] || null;
       });
+      window.dispatchEvent(new Event('campus-progress-updated'));
     } catch (err) {
       setError(err.message || 'No se pudo abrir este curso.');
     } finally {
@@ -124,7 +125,7 @@ export default function Curso() {
   }
 
   if (cargando) return <div className="flex items-center justify-center gap-3 py-24 text-sm text-stone-500"><LoaderCircle className="animate-spin" size={20} /> Cargando tu curso…</div>;
-  if (error) return <div className="mx-auto max-w-3xl"><Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-sage-700"><ArrowLeft size={16} /> Volver a mi panel</Link><div className="card-orienta mt-6 p-6 text-sm text-terracota-700" role="alert">{error}</div></div>;
+  if (error) return <div className="mx-auto max-w-3xl"><Link to="/campus" className="inline-flex items-center gap-2 text-sm font-semibold text-sage-700"><ArrowLeft size={16} /> Volver al Campus</Link><div className="card-orienta mt-6 p-6 text-sm text-terracota-700" role="alert">{error}</div></div>;
 
   const itemSeleccionado = seleccionado;
   const Icono = iconoContenido(itemSeleccionado?.tipo);
@@ -132,7 +133,7 @@ export default function Curso() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-12">
-      <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-sage-700 hover:text-sage-900"><ArrowLeft size={16} /> Mi panel</Link>
+      <Link to="/campus" className="inline-flex items-center gap-2 text-sm font-semibold text-sage-700 hover:text-sage-900"><ArrowLeft size={16} /> Campus</Link>
       <section className="overflow-hidden rounded-[2rem] bg-sage-700 p-6 text-white shadow-suave sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div className="max-w-3xl">

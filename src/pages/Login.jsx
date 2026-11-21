@@ -26,7 +26,7 @@ export default function Login() {
       // 2. Se enviará { identificador, password } al backend
       const data = await api.post('/auth/login', form);
       login(data.token, data.user);
-      navigate('/dashboard');
+      navigate('/campus');
     } catch (err) {
       setError(err.message);
     } finally {

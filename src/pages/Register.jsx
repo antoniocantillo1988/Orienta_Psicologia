@@ -40,7 +40,7 @@ export default function Register() {
         nombre_usuario: form.nombre_usuario,
       });
       login(data.token, data.user);
-      navigate('/dashboard');
+      navigate('/campus');
     } catch (err) {
       setError(err.message);
     } finally {

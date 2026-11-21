@@ -378,7 +378,7 @@ export default function AdminTalleres() {
                       <label className="sm:col-span-2">
                         <span className="mb-1.5 block text-sm font-semibold text-tierra-800">Enlace</span>
                         <input required type={['cuestionario', 'video'].includes(contenido.tipo) ? 'text' : 'url'} value={contenido.enlace} onChange={(event) => setContenido({ ...contenido, enlace: event.target.value })} className="w-full rounded-xl border border-crema-300 bg-white px-4 py-3 text-sm outline-none focus:border-sage-400" placeholder={tipoSeleccionado?.placeholder} />
-                        <span className="mt-1 block text-xs text-stone-500">{contenido.tipo === 'video' ? 'Pega un enlace de YouTube o su código iframe; el campus lo mostrará incrustado.' : contenido.tipo === 'cuestionario' ? 'Pega el enlace de Forms o el código iframe que proporciona Microsoft.' : 'El contenido se mostrará dentro del campus.'}</span>
+                        <span className="mt-1 block text-xs text-stone-500">{contenido.tipo === 'video' ? 'Pega un enlace de YouTube o su código iframe; el campus lo mostrará incrustado.' : contenido.tipo === 'cuestionario' ? 'En Microsoft Forms, usa Recopilar respuestas → Insertar y pega el enlace de inserción. Configura quién puede responder.' : contenido.tipo === 'pdf' ? 'En Google Drive, activa “Cualquier persona con el enlace puede ver” y pega el enlace del archivo. Google controla su visor y sus avisos internos.' : 'El contenido se mostrará dentro del campus.'}</span>
                       </label>
                     )}
                     <label className="sm:col-span-2">

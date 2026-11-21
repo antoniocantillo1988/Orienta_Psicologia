@@ -15,7 +15,7 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
   }
 
   if (!user) return <Navigate to="/login" replace />;
-  if (adminOnly && Number(user.tipo) !== 1) return <Navigate to="/dashboard" replace />;
+  if (adminOnly && Number(user.tipo) !== 1) return <Navigate to="/campus" replace />;
 
   return children;
 }
