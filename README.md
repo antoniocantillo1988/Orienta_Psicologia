@@ -1,2 +1,2 @@
 # Orienta Psicología
-Un espacio orientado para aquellos olvidados que son los cuidadores. 
+Un espacio orientado para aquellos olvidados como son los cuidadores. 
