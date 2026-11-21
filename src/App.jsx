@@ -20,6 +20,7 @@ import AcercaDe from './pages/AcercaDe';
 import Privacidad from './pages/Privacidad';
 
 const AdminTalleres = lazy(() => import('./pages/AdminTalleres'));
+const AdminMateriales = lazy(() => import('./pages/AdminMateriales'));
 const Curso = lazy(() => import('./pages/Curso'));
 
 function CargandoPagina() {
@@ -55,6 +56,7 @@ export default function App() {
             <Route path="/admin/citas" element={<ProtectedRoute adminOnly><AdminCitas /></ProtectedRoute>} />
             <Route path="/admin/usuarios" element={<ProtectedRoute adminOnly><AdminUsuarios /></ProtectedRoute>} />
             <Route path="/admin/talleres" element={<ProtectedRoute adminOnly><Suspense fallback={<CargandoPagina />}><AdminTalleres /></Suspense></ProtectedRoute>} />
+            <Route path="/admin/material" element={<ProtectedRoute adminOnly><Suspense fallback={<CargandoPagina />}><AdminMateriales /></Suspense></ProtectedRoute>} />
 
             {/* Fallback */}
             <Route path="*" element={<Home />} />

@@ -110,6 +110,7 @@ function MenuLateral({ onNavigate }) {
               <NavItem to="/admin/citas" icon={CalendarCheck} onClick={onNavigate}>Modificar citas</NavItem>
               <NavItem to="/admin/usuarios" icon={Users} onClick={onNavigate}>Modificar usuarios</NavItem>
               <NavItem to="/admin/talleres" icon={GraduationCap} onClick={onNavigate}>Modificar Talleres</NavItem>
+              <NavItem to="/admin/material" icon={FolderOpen} onClick={onNavigate}>Modificar Materiales y Guías</NavItem>
             </div>
           </div>
         )}

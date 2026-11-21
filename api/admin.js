@@ -4,6 +4,7 @@ import huecos from './_route_admin_huecos.js';
 import usuarios from './_route_admin_usuarios.js';
 import talleres from './_route_admin_talleres.js';
 import talleresContenido from './_route_admin_talleres_contenido.js';
+import materiales from './_route_admin_materiales.js';
 
 const routes = {
   citas,
@@ -11,6 +12,7 @@ const routes = {
   usuarios,
   talleres,
   'talleres-contenidos': talleresContenido,
+  materiales,
 };
 
 export default async function handler(req, res) {

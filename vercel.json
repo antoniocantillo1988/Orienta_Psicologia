@@ -4,6 +4,7 @@
     { "source": "/api/admin/huecos", "destination": "/api/admin?route=huecos" },
     { "source": "/api/admin/usuarios", "destination": "/api/admin?route=usuarios" },
     { "source": "/api/admin/talleres/contenido", "destination": "/api/admin?route=talleres-contenidos" },
+    { "source": "/api/admin/materiales", "destination": "/api/admin?route=materiales" },
     { "source": "/api/admin/talleres", "destination": "/api/admin?route=talleres" },
     { "source": "/api/auth/login", "destination": "/api/auth?route=login" },
     { "source": "/api/auth/register", "destination": "/api/auth?route=register" },
@@ -13,6 +14,7 @@
     { "source": "/api/cursos/contenido", "destination": "/api/cursos?route=contenido" },
     { "source": "/api/cursos/progreso", "destination": "/api/cursos?route=progreso" },
     { "source": "/api/cursos/recordatorios", "destination": "/api/cursos?route=recordatorios" },
+    { "source": "/api/materiales", "destination": "/api/cursos?route=materiales" },
     { "source": "/api/stripe/checkout", "destination": "/api/stripe?route=checkout" },
     { "source": "/api/stripe/portal", "destination": "/api/stripe?route=portal" },
     {
