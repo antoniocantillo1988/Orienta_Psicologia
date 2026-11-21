@@ -64,7 +64,7 @@ export default function AcercaDe() {
       <div className="mx-auto max-w-4xl space-y-8 px-4 py-10 sm:px-8 sm:py-14">
         {/* Cabecera */}
         <header className={`${cristal} text-center`}>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-oro-600">Acerca de nosotros</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-oro-600">Sobre mí</p>
           <h1 className="mt-3 font-serif text-3xl font-bold text-tierra-800 sm:text-4xl">
             Un espacio humano, seguro y sin juicios para quienes cuidan con el corazón
           </h1>

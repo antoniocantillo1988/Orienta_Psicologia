@@ -18,6 +18,7 @@ import AdminCitas from './pages/AdminCitas';
 import AdminUsuarios from './pages/AdminUsuarios';
 import AcercaDe from './pages/AcercaDe';
 import Privacidad from './pages/Privacidad';
+import PreguntasFrecuentes from './pages/PreguntasFrecuentes';
 
 const AdminTalleres = lazy(() => import('./pages/AdminTalleres'));
 const AdminMateriales = lazy(() => import('./pages/AdminMateriales'));
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/talleres" element={<Talleres />} />
             <Route path="/cursos/:id" element={<ProtectedRoute><Suspense fallback={<CargandoPagina />}><Curso /></Suspense></ProtectedRoute>} />
             <Route path="/material" element={<Material />} />
+            <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
             <Route path="/acerca-de" element={<AcercaDe />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />

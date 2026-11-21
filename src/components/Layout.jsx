@@ -82,7 +82,7 @@ function MenuLateral({ onNavigate }) {
           <NavItem to="/citas" icon={Calendar} onClick={onNavigate}>Consultas</NavItem>
           <NavItem to="/talleres" icon={BookOpen} onClick={onNavigate}>Talleres</NavItem>
           <NavItem to="/material" icon={FolderOpen} onClick={onNavigate}>Materiales y guías</NavItem>
-          <NavItem to="/acerca-de" icon={Info} onClick={onNavigate}>Acerca de nosotros</NavItem>
+          <NavItem to="/acerca-de" icon={Info} onClick={onNavigate}>Acerca de mí</NavItem>
         </nav>
 
         {/* Solo para usuarios con sesión */}
