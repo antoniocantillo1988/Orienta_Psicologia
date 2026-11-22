@@ -51,7 +51,7 @@ export default function PreguntasFrecuentes() {
   const cerrarOfertaRef = useRef(null);
 
   useEffect(() => {
-    const demora = 12_000;
+    const demora = 6_000;
     let restante = demora;
     let temporizador = null;
     let inicioTramo = 0;
@@ -184,11 +184,11 @@ export default function PreguntasFrecuentes() {
               <h2 id="oferta-titulo" className="mt-2 font-serif text-2xl font-bold sm:text-3xl">Bono de 10 sesiones</h2>
               <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-2">
                 <span className="text-4xl font-extrabold sm:text-5xl">300 €</span>
-                <span className="pb-1 text-sm font-semibold text-white/90">30 € por sesión de 45 minutos</span>
+                <span className="pb-1 text-sm font-semibold text-white/90">30 € por sesión</span>
                 <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-bold">40 % de ahorro</span>
               </div>
               <p id="oferta-descripcion" className="mt-3 max-w-2xl text-sm leading-6 text-white/90">
-                Ahorras 200 € frente a diez sesiones individuales de 50 €. La primera consulta de acogida es totalmente gratuita y va aparte del bono.
+                La primera sesión de acogida es totalmente gratuita.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link to="/citas" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-sage-700 transition hover:bg-oro-100">
