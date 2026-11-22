@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CircleHelp, MessageCircle } from 'lucide-react';
 
@@ -46,6 +47,123 @@ const preguntas = [
 ];
 
 export default function PreguntasFrecuentes() {
+  const [mostrarOferta, setMostrarOferta] = useState(false);
+  const cerrarOfertaRef = useRef(null);
+
+  useEffect(() => {
+    const demora = 12_000;
+    let restante = demora;
+    let temporizador = null;
+    let inicioTramo = 0;
+    let actividadIniciada = false;
+    let contextoAudio = null;
+
+    function activarSonido() {
+      const AudioContexto = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContexto) return;
+      try {
+        if (!contextoAudio) contextoAudio = new AudioContexto();
+        if (contextoAudio.state === 'suspended') contextoAudio.resume().catch(() => {});
+      } catch {
+        contextoAudio = null;
+      }
+    }
+
+    function sonarLlamada() {
+      if (!contextoAudio || contextoAudio.state !== 'running') return;
+      const ahora = contextoAudio.currentTime;
+      [880, 1174, 1568].forEach((frecuencia, indice) => {
+        const oscilador = contextoAudio.createOscillator();
+        const volumen = contextoAudio.createGain();
+        const comienzo = ahora + indice * 0.09;
+        oscilador.type = 'sine';
+        oscilador.frequency.value = frecuencia;
+        volumen.gain.setValueAtTime(0.0001, comienzo);
+        volumen.gain.exponentialRampToValueAtTime(0.12, comienzo + 0.025);
+        volumen.gain.exponentialRampToValueAtTime(0.0001, comienzo + 0.42);
+        oscilador.connect(volumen);
+        volumen.connect(contextoAudio.destination);
+        oscilador.start(comienzo);
+        oscilador.stop(comienzo + 0.45);
+      });
+    }
+
+    function abrirOferta() {
+      temporizador = null;
+      restante = 0;
+      setMostrarOferta(true);
+      sonarLlamada();
+    }
+
+    function continuarCuenta() {
+      if (!actividadIniciada || temporizador || restante <= 0 || document.visibilityState !== 'visible') return;
+      inicioTramo = Date.now();
+      temporizador = window.setTimeout(abrirOferta, restante);
+    }
+
+    function pausarCuenta() {
+      if (!temporizador) return;
+      window.clearTimeout(temporizador);
+      temporizador = null;
+      restante = Math.max(0, restante - (Date.now() - inicioTramo));
+    }
+
+    function iniciarActividad() {
+      activarSonido();
+      actividadIniciada = true;
+      continuarCuenta();
+    }
+
+    function cambiarVisibilidad() {
+      if (document.visibilityState === 'visible') continuarCuenta();
+      else pausarCuenta();
+    }
+
+    document.addEventListener('pointerdown', iniciarActividad);
+    document.addEventListener('keydown', iniciarActividad);
+    document.addEventListener('touchstart', iniciarActividad, { passive: true });
+    document.addEventListener('visibilitychange', cambiarVisibilidad);
+
+    return () => {
+      pausarCuenta();
+      document.removeEventListener('pointerdown', iniciarActividad);
+      document.removeEventListener('keydown', iniciarActividad);
+      document.removeEventListener('touchstart', iniciarActividad);
+      document.removeEventListener('visibilitychange', cambiarVisibilidad);
+      if (contextoAudio && contextoAudio.state !== 'closed') contextoAudio.close().catch(() => {});
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mostrarOferta) return undefined;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    cerrarOfertaRef.current?.focus();
+    return () => { document.body.style.overflow = overflowAnterior; };
+  }, [mostrarOferta]);
+
+  function manejarTeclasOferta(event) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const controles = event.currentTarget.querySelectorAll('a[href], button:not([disabled])');
+    if (!controles.length) {
+      event.preventDefault();
+      return;
+    }
+    const primero = controles[0];
+    const ultimo = controles[controles.length - 1];
+    if (event.shiftKey && document.activeElement === primero) {
+      event.preventDefault();
+      ultimo.focus();
+    } else if (!event.shiftKey && document.activeElement === ultimo) {
+      event.preventDefault();
+      primero.focus();
+    }
+  }
+
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <header className="rounded-3xl bg-gradient-to-br from-sage-50 via-white to-crema-100 p-6 sm:p-9">
@@ -56,23 +174,34 @@ export default function PreguntasFrecuentes() {
         </p>
       </header>
 
-      <section aria-label="Oferta promocional" className="relative isolate overflow-hidden rounded-3xl bg-gradient-to-r from-sage-700 via-sage-600 to-terracota-500 p-6 text-white shadow-suave sm:p-8">
-        <div aria-hidden="true" className="absolute -right-8 -top-14 -z-10 h-52 w-52 rounded-full border-[24px] border-white/10" />
-        <div aria-hidden="true" className="absolute -bottom-12 right-24 -z-10 h-36 w-36 rounded-full bg-oro-300/20 blur-sm" />
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-oro-200">Oferta promocional</p>
-        <h2 className="mt-2 font-serif text-2xl font-bold sm:text-3xl">Bono de 10 sesiones</h2>
-        <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-2">
-          <span className="text-4xl font-extrabold sm:text-5xl">300 €</span>
-          <span className="pb-1 text-sm font-semibold text-white/90">30 € por sesión · 45 minutos cada una</span>
-          <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-bold">40 % de ahorro</span>
+      {mostrarOferta && (
+        <div onKeyDown={manejarTeclasOferta} className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-tierra-800/65 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="oferta-titulo" aria-describedby="oferta-descripcion">
+          <div className="relative my-auto w-full max-w-xl overflow-hidden rounded-3xl bg-gradient-to-br from-sage-700 via-sage-600 to-terracota-500 p-6 text-white shadow-2xl sm:p-9">
+            <div aria-hidden="true" className="absolute -right-8 -top-14 h-52 w-52 rounded-full border-[24px] border-white/10" />
+            <div aria-hidden="true" className="absolute -bottom-12 right-24 h-36 w-36 rounded-full bg-oro-300/20 blur-sm" />
+            <div className="relative">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-oro-200">Oferta promocional</p>
+              <h2 id="oferta-titulo" className="mt-2 font-serif text-2xl font-bold sm:text-3xl">Bono de 10 sesiones</h2>
+              <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-2">
+                <span className="text-4xl font-extrabold sm:text-5xl">300 €</span>
+                <span className="pb-1 text-sm font-semibold text-white/90">30 € por sesión de 45 minutos</span>
+                <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-bold">40 % de ahorro</span>
+              </div>
+              <p id="oferta-descripcion" className="mt-3 max-w-2xl text-sm leading-6 text-white/90">
+                Ahorras 200 € frente a diez sesiones individuales de 50 €. La primera consulta de acogida es totalmente gratuita y va aparte del bono.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link to="/citas" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-sage-700 transition hover:bg-oro-100">
+                  Solicitar consulta gratuita <ArrowRight size={16} />
+                </Link>
+                <button ref={cerrarOfertaRef} type="button" onClick={() => setMostrarOferta(false)} className="rounded-full border border-white/70 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-sage-600">
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/90">
-          Ahorras 200 € frente a diez sesiones individuales de 50 €. La primera consulta de orientación es totalmente gratuita y va aparte del bono.
-        </p>
-        <Link to="/citas" className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-sage-700 transition hover:bg-oro-100">
-          Solicitar primera consulta gratuita <ArrowRight size={16} />
-        </Link>
-      </section>
+      )}
 
       <section className="space-y-3" aria-label="Respuestas a preguntas frecuentes">
         {preguntas.map((item) => (
