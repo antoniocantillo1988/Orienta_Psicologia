@@ -1,12 +1,13 @@
 // src/components/Layout.jsx
-import { useState } from 'react';
-import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   MessageSquare, BookOpen, Calendar, Home, LogOut, Phone,
   CalendarCheck, Users, ShieldCheck, Menu, X, LayoutDashboard,
-  Info, ClipboardList, FileText, FolderOpen,
+  Info, ClipboardList, FileText, FolderOpen, GraduationCap, Bell, CircleHelp,
 } from 'lucide-react';
+import { api } from '../lib/api';
 //Popout para el formulario:
 
 // Correcto (busca src/components/FeedbackPopout.jsx)
@@ -15,7 +16,7 @@ import FeedbackPopout from './FeedbackPopout';
 const AVISO_LEGAL =
   'Aviso Legal: Antonio Cantillo Rueda, con número de Colegiado COPAO AO14923 acogido al Código Deontológico de Psicología, a la Política de Protección de datos y privacidad acorde a la LOPD.';
 
-function NavItem({ to, icon: Icon, children, onClick, end = false }) {
+function NavItem({ to, icon: Icon, children, onClick, end = false, notification = false }) {
   return (
     <NavLink
       to={to}
@@ -29,7 +30,8 @@ function NavItem({ to, icon: Icon, children, onClick, end = false }) {
         }`
       }
     >
-      <Icon size={19} /> {children}
+      <Icon size={19} /> <span className="flex-1">{children}</span>
+      {notification && <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-terracota-50 text-terracota-600" aria-label="Tienes formación pendiente"><Bell size={14} /><span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-terracota-500 ring-2 ring-white" /></span>}
     </NavLink>
   );
 }
@@ -49,6 +51,18 @@ function Marca({ onClick }) {
 function MenuLateral({ onNavigate }) {
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [novedades, setNovedades] = useState(false);
+
+  useEffect(() => {
+    let activo = true;
+    const revisar = () => api.get('/cursos/mis-cursos')
+      .then((data) => { if (activo) setNovedades((data.cursos || []).some((curso) => Number(curso.porcentaje) < 100)); })
+      .catch(() => { if (activo) setNovedades(false); });
+    if (user) revisar(); else setNovedades(false);
+    window.addEventListener('campus-progress-updated', revisar);
+    return () => { activo = false; window.removeEventListener('campus-progress-updated', revisar); };
+  }, [user, location.pathname, location.search]);
 
   function salir() {
     logout();
@@ -68,7 +82,8 @@ function MenuLateral({ onNavigate }) {
           <NavItem to="/citas" icon={Calendar} onClick={onNavigate}>Consultas</NavItem>
           <NavItem to="/talleres" icon={BookOpen} onClick={onNavigate}>Talleres</NavItem>
           <NavItem to="/material" icon={FolderOpen} onClick={onNavigate}>Materiales y guías</NavItem>
-          <NavItem to="/acerca-de" icon={Info} onClick={onNavigate}>Acerca de nosotros</NavItem>
+          <NavItem to="/preguntas-frecuentes" icon={CircleHelp} onClick={onNavigate}>Preguntas frecuentes</NavItem>
+          <NavItem to="/acerca-de" icon={Info} onClick={onNavigate}>Acerca de mí</NavItem>
         </nav>
 
         {/* Solo para usuarios con sesión */}
@@ -78,7 +93,7 @@ function MenuLateral({ onNavigate }) {
               Mi espacio
             </p>
             <div className="space-y-1">
-              <NavItem to="/dashboard" icon={LayoutDashboard} onClick={onNavigate}>Mi panel</NavItem>
+              <NavItem to="/campus" icon={GraduationCap} notification={novedades} onClick={onNavigate}>Campus</NavItem>
               <NavItem to="/chat" icon={MessageSquare} onClick={onNavigate}>Chat</NavItem>
               <NavItem to="/tareas" icon={ClipboardList} onClick={onNavigate}>Tareas</NavItem>
               <NavItem to="/informes" icon={FileText} onClick={onNavigate}>Informes</NavItem>
@@ -95,6 +110,8 @@ function MenuLateral({ onNavigate }) {
             <div className="space-y-1">
               <NavItem to="/admin/citas" icon={CalendarCheck} onClick={onNavigate}>Modificar citas</NavItem>
               <NavItem to="/admin/usuarios" icon={Users} onClick={onNavigate}>Modificar usuarios</NavItem>
+              <NavItem to="/admin/talleres" icon={GraduationCap} onClick={onNavigate}>Modificar Talleres</NavItem>
+              <NavItem to="/admin/material" icon={FolderOpen} onClick={onNavigate}>Modificar Materiales y Guías</NavItem>
             </div>
           </div>
         )}

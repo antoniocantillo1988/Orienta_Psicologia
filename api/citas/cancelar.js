@@ -1,7 +1,7 @@
 // api/citas/cancelar.js
 import { query, json, requireAuth } from '../_db.js';
 import { cancelarEventoCalendar } from '../_calendar.js';
-import nodemailer from 'nodemailer';
+import { enviarAvisoAdminCita, enviarCancelacionCita } from '../_email_cursos.js';
 
 export default async function handler(req, res) {
   // 1. Verificamos autenticación
@@ -23,9 +23,11 @@ export default async function handler(req, res) {
   try {
     // 3. Buscamos la cita y el nombre del usuario para el aviso
     const citas = await query(
-      `SELECT c.disponibilidad_id, c.google_evento_id, u.nombre_usuario 
+      `SELECT c.disponibilidad_id, c.google_evento_id, u.id AS usuario_id,
+              u.nombre_usuario, u.email, d.fecha, d.hora_inicio
        FROM citas c 
        JOIN usuarios u ON c.usuario_id = u.id 
+       JOIN disponibilidad d ON d.id = c.disponibilidad_id
        WHERE c.id = ? AND c.usuario_id = ? AND c.estado = "confirmada"`,
       [cita_id, user.id]
     );
@@ -34,7 +36,7 @@ export default async function handler(req, res) {
       return json(res, 404, { error: 'Cita no encontrada o ya está cancelada.' });
     }
 
-    const { disponibilidad_id, google_evento_id, nombre_usuario } = citas[0];
+    const { disponibilidad_id, google_evento_id, usuario_id, nombre_usuario, email, fecha, hora_inicio } = citas[0];
 
     // 4. Intentamos cancelar en Google Calendar
     if (google_evento_id) {
@@ -51,29 +53,18 @@ export default async function handler(req, res) {
     // 6. Marcamos la cita como cancelada
     await query('UPDATE citas SET estado = "cancelada" WHERE id = ?', [cita_id]);
 
-    // 7. Notificación por email a Antonio
+    // La cancelación queda registrada aunque falle el servicio de correo.
     try {
-      // Se crea el transportador aquí para evitar un crash si las variables de entorno no están definidas.
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
+      await enviarCancelacionCita({
+        usuarioId: usuario_id, citaId: cita_id, email, nombre: nombre_usuario,
+        fecha, hora: hora_inicio,
       });
-
-      await transporter.sendMail({
-        from: '"Sistema de Citas" <tu-email@gmail.com>',
-        to: 'antonio.es.cantillo@gmail.com',
-        subject: '⚠️ Cita cancelada',
-        html: `
-          <h1>Cita cancelada</h1>
-          <p>El usuario <b>${nombre_usuario}</b> ha cancelado su cita (ID: ${cita_id}).</p>
-          <p>El hueco ya ha sido liberado en el sistema.</p>
-        `
+      await enviarAvisoAdminCita({
+        usuarioId: usuario_id, citaId: cita_id, usuario: nombre_usuario, email,
+        fecha, hora: hora_inicio, accion: 'cita cancelada por el usuario',
       });
     } catch (emailErr) {
-      console.error('[cancelar] Error al enviar email de notificación:', emailErr.message);
+      console.error('[cancelar] No se pudo encolar el email de cancelación:', emailErr.message);
     }
 
     return json(res, 200, { mensaje: 'Cita cancelada correctamente.' });

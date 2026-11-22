@@ -64,15 +64,15 @@ export default function AcercaDe() {
       <div className="mx-auto max-w-4xl space-y-8 px-4 py-10 sm:px-8 sm:py-14">
         {/* Cabecera */}
         <header className={`${cristal} text-center`}>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-oro-600">Acerca de nosotros</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-oro-600">Sobre mí</p>
           <h1 className="mt-3 font-serif text-3xl font-bold text-tierra-800 sm:text-4xl">
             Un espacio humano, seguro y sin juicios para quienes cuidan con el corazón
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-stone-600">
-            Acompañamiento cercano, con pautas prácticas de autocuidado y gestión del estrés para quien cuida de un familiar con una enfermedad neurodegenerativa. En Málaga, a domicilio u online.
+            Acompañamiento cercano, con pautas prácticas de autocuidado y gestión del estrés para quien cuida de un familiar con una enfermedad neurodegenerativa. A domicilio en Málaga y online.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link to="/citas" className="btn-primary">Reserva una sesión de orientación</Link>
+            <Link to="/citas" className="btn-primary">Reserva la primera sesión de Acogida</Link>
             <a href="#servicios" className="btn-outline">Conoce mis servicios</a>
           </div>
         </header>

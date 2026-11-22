@@ -1,24 +1,27 @@
 // src/pages/Register.jsx
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 
 export default function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [form, setForm] = useState({
     nombre_usuario: '',
     email: '',
     password: '',
     password2: '',
+    acepta_tratamiento: false,
   });
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
 
   function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, type, value, checked } = e.target;
+    setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
   }
 
   async function handleSubmit(e) {
@@ -38,9 +41,10 @@ export default function Register() {
         email: form.email,
         password: form.password,
         nombre_usuario: form.nombre_usuario,
+        acepta_tratamiento: form.acepta_tratamiento,
       });
       login(data.token, data.user);
-      navigate('/dashboard');
+      navigate(location.state?.from || '/campus', { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -122,6 +126,23 @@ export default function Register() {
             />
           </div>
 
+          <label className="flex items-start gap-3 rounded-xl border border-crema-200 bg-crema-50/60 p-3 text-sm leading-6 text-stone-700">
+            <input
+              type="checkbox"
+              name="acepta_tratamiento"
+              checked={form.acepta_tratamiento}
+              onChange={handleChange}
+              required
+              className="mt-1 h-4 w-4 shrink-0 accent-sage-600"
+            />
+            <span>
+              Acepto que mis datos personales se traten para la prestación del servicio de Orienta Psicología. Más información en la{' '}
+              <Link to="/privacidad" className="font-medium text-sage-700 underline hover:text-sage-900">
+                política de privacidad
+              </Link>.
+            </span>
+          </label>
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2.5">
               {error}
@@ -137,16 +158,9 @@ export default function Register() {
           </button>
         </form>
 
-        {/* Aviso RGPD mínimo */}
-        <p className="text-xs text-stone-400 text-center mt-4 leading-relaxed">
-          Al registrarte aceptas que tus datos se traten para la prestación del servicio
-          de orientación psicoeducativa. Más info en la{' '}
-          <a href="/privacidad" className="underline">política de privacidad</a>.
-        </p>
-
         <p className="text-center text-sm text-stone-500 mt-4">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="text-teal-600 hover:underline font-medium">
+          <Link to="/login" state={location.state} className="text-teal-600 hover:underline font-medium">
             Inicia sesión
           </Link>
         </p>

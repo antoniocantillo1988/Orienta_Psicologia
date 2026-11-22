@@ -1,6 +1,6 @@
 // api/chat/index.js
 // Usa Cloudflare Workers AI - modelo Llama 3.1 8B (más fiable que 3B)
-import { query, json, requireAuth } from '../_db.js';
+import { query, json, requireAuth } from './_db.js';
 
 export default async function handler(req, res) {
   const user = requireAuth(req, res);
