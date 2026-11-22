@@ -64,7 +64,7 @@ export default function Talleres() {
 
   useEffect(() => {
     if (searchParams.get('pago') === 'correcto') {
-      setMensaje('Pago recibido. Estamos confirmando tu inscripción; actualiza el catálogo en unos segundos si aún no aparece activa.');
+      setMensaje('Pago recibido. Estoy confirmando tu inscripción; actualiza el catálogo en unos segundos si aún no aparece activa.');
       cargarCursos();
     } else if (searchParams.get('pago') === 'cancelado') {
       setMensaje('El pago se canceló y no se ha activado la inscripción. Puedes volver a intentarlo cuando quieras.');
@@ -215,7 +215,7 @@ export default function Talleres() {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-sage-50 text-sage-600">
               <BookOpen size={30} strokeWidth={1.7} aria-hidden="true" />
             </div>
-            <h3 className="mt-5 font-serif text-xl font-bold text-tierra-800">Estamos preparando la programación</h3>
+            <h3 className="mt-5 font-serif text-xl font-bold text-tierra-800">Estoy preparando la programación</h3>
             <p className="mt-2 max-w-lg text-sm leading-6 text-stone-600">
               En cuanto haya talleres disponibles, encontrarás aquí sus temas y detalles.
               Mientras tanto, puedes escribirnos para consultar novedades.
