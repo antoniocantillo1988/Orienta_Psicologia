@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   MessageSquare, BookOpen, Calendar, Home, LogOut, Phone,
   CalendarCheck, Users, ShieldCheck, Menu, X, LayoutDashboard,
-  Info, ClipboardList, FileText, FolderOpen, GraduationCap, Bell,
+  Info, ClipboardList, FileText, FolderOpen, GraduationCap, Bell, CircleHelp,
 } from 'lucide-react';
 import { api } from '../lib/api';
 //Popout para el formulario:
@@ -82,6 +82,7 @@ function MenuLateral({ onNavigate }) {
           <NavItem to="/citas" icon={Calendar} onClick={onNavigate}>Consultas</NavItem>
           <NavItem to="/talleres" icon={BookOpen} onClick={onNavigate}>Talleres</NavItem>
           <NavItem to="/material" icon={FolderOpen} onClick={onNavigate}>Materiales y guías</NavItem>
+          <NavItem to="/preguntas-frecuentes" icon={CircleHelp} onClick={onNavigate}>Preguntas frecuentes</NavItem>
           <NavItem to="/acerca-de" icon={Info} onClick={onNavigate}>Acerca de mí</NavItem>
         </nav>
 
