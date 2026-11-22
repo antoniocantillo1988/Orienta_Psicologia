@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LifeBuoy, Brain, BadgeCheck, HeartHandshake, CircleHelp } from 'lucide-react';
+import { LifeBuoy, Brain, BadgeCheck, HeartHandshake } from 'lucide-react';
 
 const testimonios = [
   { texto: 'Las sesiones con Antonio han sido un antes y un después. Me ha ayudado a gestionar mi ansiedad de una forma muy práctica.', autor: 'María G.', perfil: 'Estudiante de Derecho' },
@@ -43,17 +43,18 @@ export default function Home() {
         <div className="relative flex flex-col-reverse items-center gap-8 md:flex-row md:justify-between">
           <div className="text-center md:text-left">
             <span className="inline-block rounded-full bg-sage-100 px-4 py-1 text-xs font-semibold tracking-wide text-sage-700">
-              Antonio Cantillo Rueda · Psicólogo · Colegiado COPAO AO14923
+              Antonio Cantillo Rueda · Psicólogo colegiado AO 14923
             </span>
             <h1 className="mt-4 font-serif text-3xl font-bold text-tierra-800 sm:text-4xl">
-              Cuidar de alguien no debería significar olvidarte de ti.
+              ¿Cuidas de alguien y sientes que ya no te queda energía para ti?
             </h1>
-            <p className="mt-4 text-lg font-semibold leading-relaxed text-sage-700">
-              Acompañamiento psicológico para familiares y personas cuidadoras de personas con Alzheimer y otras enfermedades neurodegenerativas.
+            <p className="mt-4 text-stone-600">
+              No tienes que llevar este peso a solas. Te acompaño de forma cercana con estrategias prácticas de autocuidado, gestión del estrés y apoyo familiar en Málaga, a domicilio y online.
             </p>
-            <p className="mt-4 leading-relaxed text-stone-600">
-              Un espacio profesional donde puedas expresar cómo te sientes, comprender tus dificultades y desarrollar herramientas para afrontar el proceso de cuidado.
+            <p className="mt-3 font-serif text-2xl font-bold text-sage-600">
+              Acompañamiento a personas que cuidan
             </p>
+            <p className="mt-1 font-serif italic text-terracota-500">Acompañamos a quien cuida</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
               <Link to="/citas" className="btn-primary">Pedir cita</Link>
               <Link to="/registro" className="btn-outline">Crear cuenta</Link>
@@ -67,22 +68,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Imagen de la consulta con el mensaje de acompañamiento */}
-      <section className="relative isolate flex min-h-[38rem] items-end overflow-hidden rounded-3xl shadow-suave sm:min-h-[34rem]">
-        <img src="/foto-sala.jpg" alt="Espacio de consulta de Orienta Psicología" className="absolute inset-0 -z-20 h-full w-full object-cover" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-tierra-800/75 via-tierra-800/20 to-transparent" />
-        <div className="m-4 max-w-3xl rounded-3xl border border-white/50 bg-white/55 p-6 shadow-suave backdrop-blur-md sm:m-8 sm:p-9">
-          <h2 className="font-serif text-2xl font-bold text-tierra-800 sm:text-3xl">
-            No tienes que cargar con todo solo o sola.
-          </h2>
-          <p className="mt-4 leading-relaxed text-stone-700">
-            Cuidar de un familiar con una enfermedad neurodegenerativa supone un desgaste invisible, y muchas veces quien cuida se olvida de sí mismo hasta llegar al límite. Mi objetivo es acompañarte para que encuentres respiro, alivies la tensión y recuperes el equilibrio en tu día a día, sin tecnicismos y con pautas que te funcionen en casa.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link to="/citas" className="btn-primary">Pedir cita previa</Link>
-            <Link to="/preguntas-frecuentes" className="btn-outline inline-flex items-center gap-2"><CircleHelp size={17} />Preguntas frecuentes</Link>
-          </div>
-        </div>
+      {/* Imagen de la consulta */}
+      <section>
+        <img src="/foto-sala.jpg" alt="Consulta" className="h-80 w-full rounded-3xl object-cover shadow-suave" />
+        <p className="mt-4 text-center font-serif italic text-stone-500">
+          Un espacio diseñado para tu bienestar y tranquilidad.
+        </p>
       </section>
 
       {/* Especialidades */}
@@ -100,14 +91,17 @@ export default function Home() {
 
       {/* Llamada a la acción */}
       <section className="rounded-3xl border border-crema-200 bg-white p-8 text-center shadow-suave sm:p-10">
-        <h2 className="font-serif text-2xl font-bold text-tierra-800">Un acompañamiento cercano, centrado en quien cuida</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-stone-600">
-          Atención a domicilio en Málaga capital y online. Si tienes dudas sobre el servicio, consulta las preguntas frecuentes o escríbeme.
+        <h2 className="font-serif text-2xl font-bold text-tierra-800">No tienes que cargar con todo solo o sola. </h2>        
+        <p className="mt-3 text-stone-600">
+            Cuidar de un familiar con una enfermedad neurodegenerativa supone un desgaste invisible, y muchas veces quien cuida se olvida de sí mismo hasta llegar al límite. Mi objetivo es acompañarte para que encuentres respiro, alivies la tensión y recuperes el equilibrio en tu día a día, sin tecnicismos y con pautas que te funcionen en casa.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link to="/preguntas-frecuentes" className="btn-outline inline-flex items-center gap-2"><CircleHelp size={17} />Preguntas frecuentes</Link>
-          <a href="https://wa.me/34678766839" target="_blank" rel="noopener noreferrer" className="btn-primary">Consultar por WhatsApp</a>
+          <Link to="/citas" className="btn-primary">Pedir cita previa</Link>
+          <a href="https://wa.me/34678766839" target="_blank" rel="noopener noreferrer" className="btn-outline">Consultar dudas por WhatsApp</a>
         </div>
+        <p className="mx-auto mt-3 max-w-xl text-stone-600">
+          Atención a domicilio en Málaga capital y online, adaptadas a tus horarios y necesidades.
+        </p>
       </section>
 
       {/* Carrusel de testimonios (desactivado hasta tener testimonios reales) */}
