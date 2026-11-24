@@ -65,13 +65,20 @@ export function verifyStripeSignature(rawBody, signatureHeader) {
 }
 
 export async function readRawBody(req) {
-  if (Buffer.isBuffer(req.body)) return req.body;
-  if (typeof req.body === 'string') return Buffer.from(req.body);
-  if (req.body !== undefined) throw new Error('El cuerpo del webhook debe recibirse sin parsear.');
-
+  // Vercel exposes `req.body` through a lazy parser for JSON requests. Reading
+  // that property first consumes/parses the payload, which loses the exact
+  // bytes Stripe signs. Read the request stream directly instead.
   const chunks = [];
   for await (const chunk of req) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  return Buffer.concat(chunks);
+  if (chunks.length) return Buffer.concat(chunks);
+
+  // Keep compatibility with request mocks/adapters that provide an own data
+  // property, while deliberately avoiding a getter that could parse the body.
+  const bodyDescriptor = Object.getOwnPropertyDescriptor(req, 'body');
+  const body = bodyDescriptor && 'value' in bodyDescriptor ? bodyDescriptor.value : undefined;
+  if (Buffer.isBuffer(body)) return body;
+  if (typeof body === 'string') return Buffer.from(body);
+  throw new Error('No se recibió el cuerpo original del webhook.');
 }
 
 export function positiveInteger(value) {
