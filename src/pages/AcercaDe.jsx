@@ -69,10 +69,10 @@ export default function AcercaDe() {
             Un espacio humano, seguro y sin juicios para quienes cuidan con el corazón
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-stone-600">
-            Acompañamiento cercano, con pautas prácticas de autocuidado y gestión del estrés para quien cuida de un familiar con una enfermedad neurodegenerativa. A domicilio en Málaga y online.
+            Acompañamiento cercano, con pautas prácticas de autocuidado y gestión del estrés para quien cuida. Sesión a domicilio en Málaga y online.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link to="/citas" className="btn-primary">Reserva la primera sesión de Acogida</Link>
+            <Link to="/citas" className="btn-primary">Reserva tu sesión</Link>
             <a href="#servicios" className="btn-outline">Conoce mis servicios</a>
           </div>
         </header>
