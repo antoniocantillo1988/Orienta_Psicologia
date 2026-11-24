@@ -99,7 +99,21 @@ export default function AcercaDe() {
             ))}
           </ul>
 
-          
+          <div className="mt-8 border-t border-crema-200 pt-6">
+            <h3 className="font-serif text-xl font-bold text-tierra-800">Experiencia profesional</h3>
+            <div className="mt-4 flex items-start gap-4 rounded-2xl border border-sage-100 bg-sage-50/70 p-4 sm:p-5">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-sage-600 shadow-sm">
+                <HeartHandshake size={20} />
+              </span>
+              <div>
+                <h4 className="font-semibold text-tierra-800">Colaborador del Chat del Teléfono de la Esperanza</h4>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-sage-700">Desde 2024</p>
+                <p className="mt-3 text-sm leading-relaxed text-stone-600">
+                  Realizo labores de atención personalizada en situaciones de crisis. Mi enfoque se centra en brindar soporte emocional eficaz.
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Áreas de servicio */}
