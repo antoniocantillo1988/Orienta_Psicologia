@@ -31,6 +31,18 @@ function precioCurso(curso) {
   }
 }
 
+function textoCuotaMembresia(curso) {
+  const precio = Number(curso.precio);
+  if (!Number.isFinite(precio)) return 'La membresía da acceso a todos los cursos por una cuota mensual.';
+  const moneda = String(curso.moneda || 'EUR').toUpperCase();
+  try {
+    const importe = new Intl.NumberFormat('es-ES', { style: 'currency', currency: moneda }).format(precio);
+    return `El precio de la membresía es de ${importe} al mes.`;
+  } catch {
+    return `El precio de la membresía es de ${precio.toFixed(2)} € al mes.`;
+  }
+}
+
 function etiquetaAcceso(tipo) {
   if (tipo === 'membresia') return 'Membresía mensual';
   if (tipo === 'pago') return 'Pago único';
@@ -252,8 +264,8 @@ export default function Talleres() {
                     {curso.tipo_acceso === 'membresia' ? (
                       <span
                         className="inline-flex items-center gap-2 font-semibold text-amber-800"
-                        title="El precio de la membresía es de 20 euros al mes."
-                        aria-label="Requiere membresía. El precio de la membresía es de 20 euros al mes."
+                        title={textoCuotaMembresia(curso)}
+                        aria-label={`Requiere membresía. ${textoCuotaMembresia(curso)}`}
                       >
                         <AlertTriangle size={18} className="shrink-0 text-amber-600" aria-hidden="true" />
                         Requiere membresía

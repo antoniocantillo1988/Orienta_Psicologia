@@ -5,7 +5,7 @@ const TIPOS_ACCESO = new Set(['gratis', 'pago', 'membresia']);
 function normalizarCurso(body = {}) {
   const titulo = String(body.titulo || '').trim();
   const tipoAcceso = String(body.tipo_acceso || 'gratis');
-  const precio = tipoAcceso === 'membresia' ? 20 : Number(body.precio || 0);
+  const precio = Number(body.precio || 0);
   const duracion = body.duracion_horas === '' || body.duracion_horas == null
     ? null
     : Number(body.duracion_horas);
@@ -44,16 +44,23 @@ export default async function handler(req, res) {
     if (!admin) return;
 
     if (req.method === 'GET') {
+      const [cuota] = await query(
+        `SELECT precio FROM cursos
+         WHERE tipo_acceso = 'membresia'
+         ORDER BY id ASC LIMIT 1`
+      );
+      const cuotaMembresia = Number(cuota?.precio ?? 20);
       const cursos = await query(
         `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
-                CASE WHEN c.tipo_acceso = 'membresia' THEN 20 ELSE c.precio END AS precio,
+                CASE WHEN c.tipo_acceso = 'membresia' THEN ? ELSE c.precio END AS precio,
                 CASE WHEN c.tipo_acceso = 'membresia' THEN 'EUR' ELSE c.moneda END AS moneda,
                 c.duracion_horas, c.publicado,
                 c.fecha_creacion, c.fecha_actualizacion
          FROM cursos c
-         ORDER BY c.fecha_actualizacion DESC, c.id DESC`
+         ORDER BY c.fecha_actualizacion DESC, c.id DESC`,
+        [cuotaMembresia]
       );
-      return json(res, 200, { cursos });
+      return json(res, 200, { cursos, cuota_membresia: cuotaMembresia });
     }
 
     if (req.method === 'POST') {
@@ -66,6 +73,13 @@ export default async function handler(req, res) {
         [curso.titulo, curso.descripcion, curso.categoria, curso.tipo_acceso,
           curso.precio, curso.moneda, curso.duracion_horas, curso.publicado]
       );
+      if (curso.tipo_acceso === 'membresia') {
+        await query(
+          `UPDATE cursos SET precio = ?, moneda = 'EUR', fecha_actualizacion = CURRENT_TIMESTAMP
+           WHERE tipo_acceso = 'membresia'`,
+          [curso.precio]
+        );
+      }
       return json(res, 201, { ok: true, curso_id: result.insertId });
     }
 
@@ -85,6 +99,13 @@ export default async function handler(req, res) {
       );
       const [existente] = await query('SELECT id FROM cursos WHERE id = ?', [cursoId]);
       if (!existente) return json(res, 404, { error: 'No se encontró ese curso.' });
+      if (curso.tipo_acceso === 'membresia') {
+        await query(
+          `UPDATE cursos SET precio = ?, moneda = 'EUR', fecha_actualizacion = CURRENT_TIMESTAMP
+           WHERE tipo_acceso = 'membresia'`,
+          [curso.precio]
+        );
+      }
       return json(res, 200, { ok: true });
     }
 

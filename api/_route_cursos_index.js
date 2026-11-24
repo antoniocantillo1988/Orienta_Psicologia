@@ -8,7 +8,11 @@ export default async function handler(req, res) {
     const cursos = user
       ? await query(
           `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
-                  c.precio, c.moneda, c.duracion_horas,
+                  CASE WHEN c.tipo_acceso = 'membresia' THEN
+                    (SELECT cuota.precio FROM cursos cuota WHERE cuota.tipo_acceso = 'membresia' ORDER BY cuota.id ASC LIMIT 1)
+                    ELSE c.precio END AS precio,
+                  CASE WHEN c.tipo_acceso = 'membresia' THEN 'EUR' ELSE c.moneda END AS moneda,
+                  c.duracion_horas,
                   CASE
                     WHEN c.tipo_acceso = 'membresia' AND EXISTS (
                       SELECT 1
@@ -36,11 +40,16 @@ export default async function handler(req, res) {
           [user.id, user.id]
         )
       : await query(
-          `SELECT id, titulo, descripcion, categoria, tipo_acceso, precio, moneda, duracion_horas,
+        `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
+                CASE WHEN c.tipo_acceso = 'membresia' THEN
+                  (SELECT cuota.precio FROM cursos cuota WHERE cuota.tipo_acceso = 'membresia' ORDER BY cuota.id ASC LIMIT 1)
+                  ELSE c.precio END AS precio,
+                CASE WHEN c.tipo_acceso = 'membresia' THEN 'EUR' ELSE c.moneda END AS moneda,
+                c.duracion_horas,
                   NULL AS inscripcion_estado
-           FROM cursos
-           WHERE publicado = 1
-           ORDER BY fecha_creacion DESC, id DESC`
+         FROM cursos c
+         WHERE c.publicado = 1
+         ORDER BY c.fecha_creacion DESC, c.id DESC`
         );
 
     return json(res, 200, { cursos });

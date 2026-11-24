@@ -41,9 +41,16 @@ export default async function handler(req, res) {
       return json(res, 409, { error: 'Ya tienes una membresía activa. Puedes acceder a todos los cursos de membresía desde el catálogo.' });
     }
 
-    const amount = curso.tipo_acceso === 'membresia'
-      ? 2000
-      : Math.round(Number(curso.precio) * 100);
+    const [cuotaMembresia] = curso.tipo_acceso === 'membresia'
+      ? await query(
+          `SELECT precio FROM cursos
+           WHERE tipo_acceso = 'membresia'
+           ORDER BY id ASC LIMIT 1`
+        )
+      : [];
+    const amount = Math.round(Number(curso.tipo_acceso === 'membresia'
+      ? (cuotaMembresia?.precio ?? curso.precio)
+      : curso.precio) * 100);
     const currency = curso.tipo_acceso === 'membresia'
       ? 'eur'
       : String(curso.moneda || 'EUR').toLowerCase();

@@ -43,6 +43,7 @@ function Aviso({ aviso }) {
 
 export default function AdminTalleres() {
   const [cursos, setCursos] = useState([]);
+  const [cuotaMembresia, setCuotaMembresia] = useState(20);
   const [seleccionado, setSeleccionado] = useState(null);
   const [curso, setCurso] = useState(CURSO_VACIO);
   const [contenidos, setContenidos] = useState([]);
@@ -58,6 +59,7 @@ export default function AdminTalleres() {
     try {
       const data = await api.get('/admin/talleres');
       setCursos(data.cursos || []);
+      setCuotaMembresia(data.cuota_membresia ?? 20);
       if (seleccionado) {
         const actualizado = (data.cursos || []).find((item) => Number(item.id) === Number(seleccionado));
         if (actualizado) setCurso({ ...actualizado, publicado: Number(actualizado.publicado) === 1 });
@@ -277,7 +279,7 @@ export default function AdminTalleres() {
                 <span className="relative block">
                   <select value={curso.tipo_acceso} onChange={(event) => {
                     const tipo_acceso = event.target.value;
-                    setCurso({ ...curso, tipo_acceso, ...(tipo_acceso === 'membresia' ? { precio: '20', moneda: 'EUR' } : {}) });
+                    setCurso({ ...curso, tipo_acceso, ...(tipo_acceso === 'membresia' ? { precio: String(cuotaMembresia), moneda: 'EUR' } : {}) });
                   }} className="w-full appearance-none rounded-xl border border-crema-300 bg-white px-4 py-3 pr-10 text-sm outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100">
                     <option value="gratis">Gratuito</option><option value="pago">Pago único</option><option value="membresia">Membresía mensual</option>
                   </select>
@@ -287,8 +289,8 @@ export default function AdminTalleres() {
               {curso.tipo_acceso !== 'gratis' && (
                 <div className="grid grid-cols-[1fr_110px] gap-3">
                   <label>
-                    <span className="mb-1.5 block text-sm font-semibold text-tierra-800">Precio {curso.tipo_acceso === 'membresia' ? 'al mes' : ''}</span>
-                    <input required type="number" min="0.5" step="0.01" value={curso.precio} readOnly={curso.tipo_acceso === 'membresia'} onChange={(event) => setCurso({ ...curso, precio: event.target.value })} className={`w-full rounded-xl border border-crema-300 px-4 py-3 text-sm outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100 ${curso.tipo_acceso === 'membresia' ? 'cursor-not-allowed bg-stone-100 text-stone-500' : 'bg-white'}`} placeholder="0,00" />
+                    <span className="mb-1.5 block text-sm font-semibold text-tierra-800">Precio {curso.tipo_acceso === 'membresia' ? 'global al mes (€)' : ''}</span>
+                    <input required type="number" min="0.5" step="0.01" value={curso.precio} onChange={(event) => setCurso({ ...curso, precio: event.target.value })} className={`w-full rounded-xl border border-crema-300 px-4 py-3 text-sm outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100 ${curso.tipo_acceso === 'membresia' ? 'bg-stone-100' : 'bg-white'}`} placeholder="0,00" />
                   </label>
                   <label>
                     <span className="mb-1.5 block text-sm font-semibold text-tierra-800">Moneda</span>
@@ -297,7 +299,7 @@ export default function AdminTalleres() {
                 </div>
               )}
               {curso.tipo_acceso === 'membresia' && (
-                <p className="text-xs leading-5 text-stone-500 sm:col-span-2">La cuota común de membresía es de 20 € al mes y permite acceder a todos los cursos de esta modalidad.</p>
+                <p className="text-xs leading-5 text-stone-500 sm:col-span-2">Esta es la cuota global: al guardarla se aplicará a todos los cursos de membresía y a los próximos pagos. Da acceso a todos los cursos de esta modalidad.</p>
               )}
             </div>
 
