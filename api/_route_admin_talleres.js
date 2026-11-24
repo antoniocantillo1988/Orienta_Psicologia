@@ -5,11 +5,11 @@ const TIPOS_ACCESO = new Set(['gratis', 'pago', 'membresia']);
 function normalizarCurso(body = {}) {
   const titulo = String(body.titulo || '').trim();
   const tipoAcceso = String(body.tipo_acceso || 'gratis');
-  const precio = Number(body.precio || 0);
+  const precio = tipoAcceso === 'membresia' ? 20 : Number(body.precio || 0);
   const duracion = body.duracion_horas === '' || body.duracion_horas == null
     ? null
     : Number(body.duracion_horas);
-  const moneda = String(body.moneda || 'EUR').trim().toUpperCase();
+  const moneda = tipoAcceso === 'membresia' ? 'EUR' : String(body.moneda || 'EUR').trim().toUpperCase();
 
   if (!titulo) throw new Error('Escribe el título del curso.');
   if (!TIPOS_ACCESO.has(tipoAcceso)) throw new Error('El tipo de acceso no es válido.');
@@ -46,7 +46,9 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const cursos = await query(
         `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
-                c.precio, c.moneda, c.duracion_horas, c.publicado,
+                CASE WHEN c.tipo_acceso = 'membresia' THEN 20 ELSE c.precio END AS precio,
+                CASE WHEN c.tipo_acceso = 'membresia' THEN 'EUR' ELSE c.moneda END AS moneda,
+                c.duracion_horas, c.publicado,
                 c.fecha_creacion, c.fecha_actualizacion
          FROM cursos c
          ORDER BY c.fecha_actualizacion DESC, c.id DESC`

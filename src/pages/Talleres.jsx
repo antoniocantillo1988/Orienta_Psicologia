@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
+  AlertTriangle,
   ArrowUpRight,
   BookOpen,
   CheckCircle2,
@@ -18,6 +19,7 @@ const CONTACTO_TALLERES =
   'https://wa.me/34678766839?text=Hola%2C%20me%20gustar%C3%ADa%20recibir%20informaci%C3%B3n%20sobre%20los%20pr%C3%B3ximos%20talleres.';
 
 function precioCurso(curso) {
+  if (curso.tipo_acceso === 'membresia') return null;
   const precio = Number(curso.precio);
   if (!Number.isFinite(precio)) return 'Consultar precio';
   const moneda = String(curso.moneda || 'EUR').toUpperCase();
@@ -247,10 +249,21 @@ export default function Talleres() {
                   {curso.duracion_horas && <p className="mt-3 flex items-center gap-1.5 text-xs text-stone-500"><Clock3 size={14} /> Duración estimada: {curso.duracion_horas} h</p>}
 
                   <div className="mt-6 flex items-center justify-between gap-3 border-t border-crema-200 pt-4">
-                    <span className="font-semibold text-tierra-800">{precioCurso(curso)}</span>
+                    {curso.tipo_acceso === 'membresia' ? (
+                      <span
+                        className="inline-flex items-center gap-2 font-semibold text-amber-800"
+                        title="El precio de la membresía es de 20 euros al mes."
+                        aria-label="Requiere membresía. El precio de la membresía es de 20 euros al mes."
+                      >
+                        <AlertTriangle size={18} className="shrink-0 text-amber-600" aria-hidden="true" />
+                        Requiere membresía
+                      </span>
+                    ) : (
+                      <span className="font-semibold text-tierra-800">{precioCurso(curso)}</span>
+                    )}
                     {inscrita ? (
                       <div className="flex flex-wrap items-center justify-end gap-2">
-                        {curso.tipo_acceso === 'membresia' && (
+                        {curso.tipo_acceso === 'membresia' && Number(curso.puede_gestionar_membresia) === 1 && (
                           <button type="button" className="btn-outline" onClick={gestionarMembresia} disabled={accion === 'portal'}>
                             {accion === 'portal' ? <LoaderCircle size={16} className="animate-spin" /> : <CreditCard size={16} />}
                             Gestionar membresía
@@ -275,7 +288,7 @@ export default function Talleres() {
                   </div>
                   {curso.tipo_acceso === 'membresia' && !inscrita && (
                     <p className="mt-3 flex items-center gap-2 text-xs text-stone-500">
-                      <ShieldCheck size={14} aria-hidden="true" /> Pago mensual seguro gestionado por Stripe.
+                      <ShieldCheck size={14} aria-hidden="true" /> Una membresía vigente da acceso a todos los cursos de esta modalidad.
                     </p>
                   )}
                 </article>

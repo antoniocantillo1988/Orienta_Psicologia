@@ -10,19 +10,30 @@ export default async function handler(req, res) {
           `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
                   c.precio, c.moneda, c.duracion_horas,
                   CASE
+                    WHEN c.tipo_acceso = 'membresia' AND EXISTS (
+                      SELECT 1
+                      FROM inscripciones im
+                      JOIN cursos cm ON cm.id = im.curso_id
+                      WHERE im.usuario_id = ? AND cm.tipo_acceso = 'membresia'
+                        AND im.estado = 'activa' AND im.stripe_subscription_id IS NOT NULL
+                        AND im.fecha_fin > NOW()
+                    ) THEN 'activa'
                     WHEN i.estado = 'activa' AND (
                       c.tipo_acceso = 'gratis'
                       OR (c.tipo_acceso = 'pago' AND i.stripe_checkout_session_id IS NOT NULL)
                       OR (c.tipo_acceso = 'membresia' AND i.stripe_subscription_id IS NOT NULL AND i.fecha_fin > NOW())
                     ) THEN 'activa'
-                    WHEN i.estado IN ('activa', 'pendiente') THEN 'pendiente'
+                    WHEN i.estado IN ('activa', 'pendiente')
+                      AND (i.stripe_checkout_session_id IS NOT NULL OR i.stripe_subscription_id IS NOT NULL) THEN 'pendiente'
+                    WHEN c.tipo_acceso = 'membresia' THEN NULL
                     ELSE i.estado
-                  END AS inscripcion_estado
+                  END AS inscripcion_estado,
+                  CASE WHEN i.stripe_subscription_id IS NOT NULL THEN 1 ELSE 0 END AS puede_gestionar_membresia
            FROM cursos c
            LEFT JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = ?
            WHERE c.publicado = 1
            ORDER BY c.fecha_creacion DESC, c.id DESC`,
-          [user.id]
+          [user.id, user.id]
         )
       : await query(
           `SELECT id, titulo, descripcion, categoria, tipo_acceso, precio, moneda, duracion_horas,

@@ -6,7 +6,17 @@ export default async function handler(req, res) {
   if (!user) return json(res, 401, { error: 'Inicia sesión para consultar tus cursos.' });
 
   try {
-    const cursos = await query(
+    const [membresia] = await query(
+      `SELECT MAX(i.fecha_fin) AS valida_hasta
+       FROM inscripciones i
+       JOIN cursos c ON c.id = i.curso_id
+       WHERE i.usuario_id = ? AND c.tipo_acceso = 'membresia'
+         AND i.estado = 'activa' AND i.stripe_subscription_id IS NOT NULL
+         AND i.fecha_fin > NOW()`,
+      [user.id]
+    );
+
+    let cursos = await query(
       `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
               c.precio, c.moneda, c.duracion_horas, i.fecha_inicio,
               i.fecha_finalizacion, i.estado AS inscripcion_estado,
@@ -28,15 +38,27 @@ export default async function handler(req, res) {
       [user.id]
     );
 
-    const [membresia] = await query(
-      `SELECT MAX(i.fecha_fin) AS valida_hasta
-       FROM inscripciones i
-       JOIN cursos c ON c.id = i.curso_id
-       WHERE i.usuario_id = ? AND c.tipo_acceso = 'membresia'
-         AND i.estado = 'activa' AND i.stripe_subscription_id IS NOT NULL
-         AND i.fecha_fin > NOW()`,
-      [user.id]
-    );
+    if (membresia?.valida_hasta) {
+      const cursosMembresia = await query(
+        `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
+                c.precio, c.moneda, c.duracion_horas, i.fecha_inicio,
+                i.fecha_finalizacion, 'activa' AS inscripcion_estado,
+                1 AS puede_acceder
+         FROM cursos c
+         LEFT JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = ?
+         WHERE c.tipo_acceso = 'membresia' AND c.publicado = 1
+         ORDER BY c.fecha_creacion DESC, c.id DESC`,
+        [user.id]
+      );
+      const porId = new Map(cursos.map((curso) => [String(curso.id), curso]));
+      for (const curso of cursosMembresia) {
+        const previo = porId.get(String(curso.id));
+        porId.set(String(curso.id), previo
+          ? { ...curso, ...previo, inscripcion_estado: 'activa', puede_acceder: 1 }
+          : curso);
+      }
+      cursos = [...porId.values()];
+    }
 
     if (!cursos.length) return json(res, 200, {
       cursos: [],

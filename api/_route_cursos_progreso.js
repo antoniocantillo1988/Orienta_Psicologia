@@ -18,26 +18,59 @@ export default async function handler(req, res) {
 
   try {
     const [contenido] = await query(
-      `SELECT cc.id, cc.curso_id, cc.obligatorio
+      `SELECT cc.id, cc.curso_id, cc.obligatorio, c.tipo_acceso
        FROM curso_contenidos cc
        JOIN cursos c ON c.id = cc.curso_id
-       JOIN inscripciones i ON i.curso_id = cc.curso_id
+       LEFT JOIN inscripciones i ON i.curso_id = cc.curso_id AND i.usuario_id = ?
        WHERE cc.id = ? AND cc.publicado = 1
-         AND i.usuario_id = ? AND i.estado = 'activa'
          AND (
-           c.tipo_acceso = 'gratis'
-           OR (c.tipo_acceso = 'pago' AND i.stripe_checkout_session_id IS NOT NULL)
-           OR (c.tipo_acceso = 'membresia' AND i.stripe_subscription_id IS NOT NULL AND i.fecha_fin > NOW())
+           (c.tipo_acceso = 'gratis' AND i.estado = 'activa')
+           OR (c.tipo_acceso = 'pago' AND i.estado = 'activa' AND i.stripe_checkout_session_id IS NOT NULL)
+           OR (c.tipo_acceso = 'membresia' AND EXISTS (
+             SELECT 1
+             FROM inscripciones im
+             JOIN cursos cm ON cm.id = im.curso_id
+             WHERE im.usuario_id = ? AND cm.tipo_acceso = 'membresia'
+               AND im.estado = 'activa' AND im.stripe_subscription_id IS NOT NULL
+               AND im.fecha_fin > NOW()
+           ))
          )
        LIMIT 1`,
-      [contenidoId, user.id]
+      [user.id, contenidoId, user.id]
     );
     if (!contenido) return json(res, 403, { error: 'No tienes acceso a este contenido.' });
 
     const [inscripcionInicial] = await query(
-      'SELECT fecha_finalizacion FROM inscripciones WHERE usuario_id = ? AND curso_id = ?',
+      'SELECT fecha_finalizacion, stripe_subscription_id FROM inscripciones WHERE usuario_id = ? AND curso_id = ?',
       [user.id, contenido.curso_id]
     );
+
+    if (contenido.tipo_acceso === 'membresia') {
+      const [membresiaVigente] = await query(
+        `SELECT im.stripe_subscription_id
+         FROM inscripciones im
+         JOIN cursos cm ON cm.id = im.curso_id
+         WHERE im.usuario_id = ? AND cm.tipo_acceso = 'membresia'
+           AND im.estado = 'activa' AND im.stripe_subscription_id IS NOT NULL
+           AND im.fecha_fin > NOW()
+         ORDER BY im.fecha_fin DESC, im.id DESC
+         LIMIT 1`,
+        [user.id]
+      );
+      if (membresiaVigente && inscripcionInicial?.stripe_subscription_id !== membresiaVigente.stripe_subscription_id) {
+        await query(
+          `INSERT INTO inscripciones
+             (usuario_id, curso_id, estado, fecha_inicio, fecha_fin,
+              stripe_checkout_session_id, stripe_subscription_id)
+           VALUES (?, ?, 'activa', NOW(), NULL, NULL, NULL)
+           ON DUPLICATE KEY UPDATE
+             estado = 'activa', fecha_inicio = COALESCE(fecha_inicio, NOW()),
+             fecha_fin = NULL, stripe_checkout_session_id = NULL,
+             stripe_subscription_id = NULL`,
+          [user.id, contenido.curso_id]
+        );
+      }
+    }
 
     await query(
       `INSERT INTO curso_progreso (usuario_id, contenido_id, completado, respuesta, fecha_completado)

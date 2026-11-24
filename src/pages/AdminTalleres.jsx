@@ -275,7 +275,10 @@ export default function AdminTalleres() {
               <label>
                 <span className="mb-1.5 block text-sm font-semibold text-tierra-800">Acceso</span>
                 <span className="relative block">
-                  <select value={curso.tipo_acceso} onChange={(event) => setCurso({ ...curso, tipo_acceso: event.target.value })} className="w-full appearance-none rounded-xl border border-crema-300 bg-white px-4 py-3 pr-10 text-sm outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100">
+                  <select value={curso.tipo_acceso} onChange={(event) => {
+                    const tipo_acceso = event.target.value;
+                    setCurso({ ...curso, tipo_acceso, ...(tipo_acceso === 'membresia' ? { precio: '20', moneda: 'EUR' } : {}) });
+                  }} className="w-full appearance-none rounded-xl border border-crema-300 bg-white px-4 py-3 pr-10 text-sm outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100">
                     <option value="gratis">Gratuito</option><option value="pago">Pago único</option><option value="membresia">Membresía mensual</option>
                   </select>
                   <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-stone-400" />
@@ -285,13 +288,16 @@ export default function AdminTalleres() {
                 <div className="grid grid-cols-[1fr_110px] gap-3">
                   <label>
                     <span className="mb-1.5 block text-sm font-semibold text-tierra-800">Precio {curso.tipo_acceso === 'membresia' ? 'al mes' : ''}</span>
-                    <input required type="number" min="0.5" step="0.01" value={curso.precio} onChange={(event) => setCurso({ ...curso, precio: event.target.value })} className="w-full rounded-xl border border-crema-300 bg-white px-4 py-3 text-sm outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100" placeholder="0,00" />
+                    <input required type="number" min="0.5" step="0.01" value={curso.precio} readOnly={curso.tipo_acceso === 'membresia'} onChange={(event) => setCurso({ ...curso, precio: event.target.value })} className={`w-full rounded-xl border border-crema-300 px-4 py-3 text-sm outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100 ${curso.tipo_acceso === 'membresia' ? 'cursor-not-allowed bg-stone-100 text-stone-500' : 'bg-white'}`} placeholder="0,00" />
                   </label>
                   <label>
                     <span className="mb-1.5 block text-sm font-semibold text-tierra-800">Moneda</span>
-                    <input required maxLength={3} value={curso.moneda} onChange={(event) => setCurso({ ...curso, moneda: event.target.value.toUpperCase() })} className="w-full rounded-xl border border-crema-300 bg-white px-4 py-3 text-sm uppercase outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100" />
+                    <input required maxLength={3} value={curso.moneda} readOnly={curso.tipo_acceso === 'membresia'} onChange={(event) => setCurso({ ...curso, moneda: event.target.value.toUpperCase() })} className={`w-full rounded-xl border border-crema-300 px-4 py-3 text-sm uppercase outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100 ${curso.tipo_acceso === 'membresia' ? 'cursor-not-allowed bg-stone-100 text-stone-500' : 'bg-white'}`} />
                   </label>
                 </div>
+              )}
+              {curso.tipo_acceso === 'membresia' && (
+                <p className="text-xs leading-5 text-stone-500 sm:col-span-2">La cuota común de membresía es de 20 € al mes y permite acceder a todos los cursos de esta modalidad.</p>
               )}
             </div>
 

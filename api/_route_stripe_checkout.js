@@ -25,8 +25,28 @@ export default async function handler(req, res) {
       return json(res, 400, { error: 'Este curso no requiere un pago.' });
     }
 
-    const amount = Math.round(Number(curso.precio) * 100);
-    const currency = String(curso.moneda || 'EUR').toLowerCase();
+    const [membresiaActiva] = curso.tipo_acceso === 'membresia'
+      ? await query(
+          `SELECT 1
+           FROM inscripciones i
+           JOIN cursos c ON c.id = i.curso_id
+           WHERE i.usuario_id = ? AND c.tipo_acceso = 'membresia'
+             AND i.estado = 'activa' AND i.stripe_subscription_id IS NOT NULL
+             AND i.fecha_fin > NOW()
+           LIMIT 1`,
+          [usuario.id]
+        )
+      : [];
+    if (membresiaActiva) {
+      return json(res, 409, { error: 'Ya tienes una membresía activa. Puedes acceder a todos los cursos de membresía desde el catálogo.' });
+    }
+
+    const amount = curso.tipo_acceso === 'membresia'
+      ? 2000
+      : Math.round(Number(curso.precio) * 100);
+    const currency = curso.tipo_acceso === 'membresia'
+      ? 'eur'
+      : String(curso.moneda || 'EUR').toLowerCase();
     if (!Number.isSafeInteger(amount) || amount < 1 || !/^[a-z]{3}$/.test(currency)) {
       return json(res, 400, { error: 'El precio o la moneda del curso no son válidos.' });
     }

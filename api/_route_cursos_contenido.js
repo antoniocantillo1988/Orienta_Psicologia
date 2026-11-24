@@ -17,22 +17,31 @@ export default async function handler(req, res) {
       `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso, c.duracion_horas,
               i.estado AS inscripcion_estado, i.stripe_checkout_session_id,
               i.stripe_subscription_id,
-              (i.fecha_fin IS NOT NULL AND i.fecha_fin > NOW()) AS periodo_vigente
+              (i.fecha_fin IS NOT NULL AND i.fecha_fin > NOW()) AS periodo_vigente,
+              EXISTS (
+                SELECT 1
+                FROM inscripciones im
+                JOIN cursos cm ON cm.id = im.curso_id
+                WHERE im.usuario_id = ? AND cm.tipo_acceso = 'membresia'
+                  AND im.estado = 'activa' AND im.stripe_subscription_id IS NOT NULL
+                  AND im.fecha_fin > NOW()
+              ) AS membresia_activa
        FROM cursos c
        LEFT JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = ?
        WHERE c.id = ? AND c.publicado = 1
        LIMIT 1`,
-      [user.id, cursoId]
+      [user.id, user.id, cursoId]
     );
     if (!curso) return json(res, 404, { error: 'No se encontró el curso.' });
 
     const inscritaActiva = curso.inscripcion_estado === 'activa';
     const pagoUnicoValidado = curso.tipo_acceso === 'pago' && Boolean(curso.stripe_checkout_session_id);
     const membresiaVigente = curso.tipo_acceso === 'membresia'
-      && Boolean(curso.stripe_subscription_id)
-      && Number(curso.periodo_vigente) === 1;
+      && Number(curso.membresia_activa) === 1;
     const accesoGratis = curso.tipo_acceso === 'gratis';
-    const tieneAcceso = inscritaActiva && (accesoGratis || pagoUnicoValidado || membresiaVigente);
+    const tieneAcceso = curso.tipo_acceso === 'membresia'
+      ? membresiaVigente
+      : inscritaActiva && (accesoGratis || pagoUnicoValidado);
     if (!tieneAcceso) {
       const gestionarMembresia = curso.tipo_acceso === 'membresia'
         && Boolean(curso.stripe_subscription_id)
