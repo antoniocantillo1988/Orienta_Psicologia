@@ -52,7 +52,14 @@ export default async function handler(req, res) {
          ORDER BY c.fecha_creacion DESC, c.id DESC`
         );
 
-    return json(res, 200, { cursos });
+    const proximamente = await query(
+      `SELECT id, titulo, duracion_horas
+       FROM cursos
+       WHERE publicado = 0
+       ORDER BY fecha_actualizacion DESC, id DESC`
+    );
+
+    return json(res, 200, { cursos, proximamente });
   } catch (error) {
     console.error('[cursos] No se pudo cargar el catálogo:', error.message);
     return json(res, 500, { error: 'No se pudo cargar el catálogo de cursos.' });

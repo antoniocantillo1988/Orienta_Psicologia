@@ -54,6 +54,7 @@ export default function Talleres() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [cursos, setCursos] = useState([]);
+  const [proximamente, setProximamente] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [mensaje, setMensaje] = useState('');
@@ -65,6 +66,7 @@ export default function Talleres() {
     try {
       const data = await api.get('/cursos');
       setCursos(data.cursos || []);
+      setProximamente(data.proximamente || []);
     } catch (err) {
       setError(err.message || 'No se pudo cargar el catálogo.');
     } finally {
@@ -229,10 +231,13 @@ export default function Talleres() {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-sage-50 text-sage-600">
               <BookOpen size={30} strokeWidth={1.7} aria-hidden="true" />
             </div>
-            <h3 className="mt-5 font-serif text-xl font-bold text-tierra-800">Estoy preparando la programación</h3>
+            <h3 className="mt-5 font-serif text-xl font-bold text-tierra-800">
+              {proximamente.length ? 'Aún no hay cursos disponibles' : 'Estoy preparando la programación'}
+            </h3>
             <p className="mt-2 max-w-lg text-sm leading-6 text-stone-600">
-              En cuanto haya talleres disponibles, encontrarás aquí sus temas y detalles.
-              Mientras tanto, puedes escribirnos para consultar novedades.
+              {proximamente.length
+                ? 'Mientras preparamos los próximos cursos, puedes consultar los que aparecerán próximamente más abajo.'
+                : 'En cuanto haya talleres disponibles, encontrarás aquí sus temas y detalles. Mientras tanto, puedes escribirnos para consultar novedades.'}
             </p>
             <a href={CONTACTO_TALLERES} target="_blank" rel="noopener noreferrer" className="btn-outline mt-6">
               Consultar novedades <ArrowUpRight size={16} aria-hidden="true" />
@@ -307,6 +312,32 @@ export default function Talleres() {
               );
             })}
           </div>
+        )}
+
+        {!loading && !error && proximamente.length > 0 && (
+          <section className="mt-10" aria-labelledby="cursos-proximamente">
+            <div className="mb-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-terracota-600">En preparación</p>
+              <h2 id="cursos-proximamente" className="mt-1 font-serif text-2xl font-bold text-tierra-800">
+                Próximamente
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-stone-600">Estos cursos todavía no están publicados y aún no admiten inscripciones.</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {proximamente.map((curso) => (
+                <article key={curso.id} className="rounded-3xl border border-crema-200 bg-crema-50/70 p-5 shadow-sm">
+                  <span className="inline-flex rounded-full bg-sage-100 px-3 py-1 text-xs font-semibold text-sage-800">Próximamente</span>
+                  <h3 className="mt-3 font-serif text-lg font-bold text-tierra-800">{curso.titulo}</h3>
+                  <p className="mt-3 flex items-center gap-2 text-sm text-stone-600">
+                    <Clock3 size={15} aria-hidden="true" />
+                    {curso.duracion_horas
+                      ? `Duración estimada: ${curso.duracion_horas} h`
+                      : 'Duración por confirmar'}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
         )}
       </section>
     </div>
