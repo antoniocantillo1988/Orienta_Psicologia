@@ -84,7 +84,7 @@ export default function AcercaDe() {
           <blockquote className="mt-6 border-l-4 border-terracota-500 pl-4 font-serif italic text-stone-600">
             Mi labor se centra en el acompañamiento y atención individualizada 
             al cuidador/a, ofreciendo herramientas prácticas para el día a día, la gestión del estrés derivado de
-            la atención prolongada y la mejora de la calidad de vida en el entorno familiar, trabajando en red
+            la atención prolongada y la mejora de la calidad de vida en el entorno familiar, trabajando
             con otros profesionales sociosanitarios cuando el caso lo requiere.
           </blockquote>
 
