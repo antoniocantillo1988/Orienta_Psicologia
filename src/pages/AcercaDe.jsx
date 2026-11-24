@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import {
   GraduationCap, Award, BadgeCheck, HeartHandshake, Brain, MapPin,
-  Phone, AtSign, ClipboardList, Route, RefreshCw,
+  Phone, Linkedin, Instagram, ClipboardList, Route, RefreshCw,
 } from 'lucide-react';
 
 const credenciales = [
@@ -79,7 +79,7 @@ export default function AcercaDe() {
 
         {/* Sobre mí */}
         <section className={cristal}>
-          <h2 className="font-serif text-2xl font-bold text-tierra-800">Sobre mí y mi marco profesional</h2>
+          <h2 className="font-serif text-2xl font-bold text-tierra-800">Sobre mi formación académica</h2>
         
           <blockquote className="mt-6 border-l-4 border-terracota-500 pl-4 font-serif italic text-stone-600">
             Mi labor se centra en el acompañamiento y atención individualizada 
@@ -114,6 +114,17 @@ export default function AcercaDe() {
               </div>
             </div>
           </div>
+
+          <a
+            href="https://linkedin.com/in/antonio-cantillo-rueda"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Perfil de LinkedIn de Antonio Cantillo Rueda, abre en una pestaña nueva"
+            className="btn-outline mt-5 inline-flex items-center gap-2"
+          >
+            <Linkedin size={18} aria-hidden="true" />
+            <span>@antonio-cantillo-rueda</span>
+          </a>
         </section>
 
         {/* Áreas de servicio */}
@@ -166,7 +177,7 @@ export default function AcercaDe() {
               rel="noopener noreferrer"
               className="btn-outline mt-4"
             >
-              <AtSign size={16} /> @orientapsicologiamalaga
+              <Instagram size={16} aria-hidden="true" /> @orientapsicologiamalaga
             </a>
           </div>
 
