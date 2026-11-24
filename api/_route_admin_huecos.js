@@ -1,5 +1,5 @@
 // api/admin/huecos.js
-import { query, json, requireAdmin } from '../_db.js';
+import { query, json, requireAdmin } from './_db.js';
 
 export default async function handler(req, res) {
   try {

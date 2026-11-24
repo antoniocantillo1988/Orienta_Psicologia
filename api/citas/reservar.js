@@ -1,7 +1,7 @@
 // api/citas/reservar.js
 import { query, json, requireAuth } from '../_db.js';
 import { crearEventoCalendar, cancelarEventoCalendar } from '../_calendar.js';
-import nodemailer from 'nodemailer';
+import { enviarAvisoAdminCita, enviarConfirmacionCita } from '../_email_cursos.js';
 
 const HORAS_ANTELACION = 6;
 
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
     google_evento_id_creado = eventoGoogle.evento_id;
 
     // 5. Guardar la cita
-    await query(
+    const citaCreada = await query(
       `INSERT INTO citas
         (usuario_id, disponibilidad_id, motivo_consulta, estado, google_evento_id, enlace_videollamada)
        VALUES (?, ?, ?, 'confirmada', ?, ?)`,
@@ -87,33 +87,31 @@ export default async function handler(req, res) {
     // 6. Marcar el hueco como ocupado
     await query('UPDATE disponibilidad SET ocupado = 1 WHERE id = ?', [disponibilidad_id]);
 
-    // 7. Aviso por email a Antonio (si falla, la reserva sigue siendo válida)
+    // Los avisos por email son complementarios: un fallo de correo no anula la cita.
     try {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      await transporter.sendMail({
-        from: `"Sistema de Citas" <${process.env.EMAIL_USER}>`,
-        to: 'antonio.es.cantillo@gmail.com',
-        subject: 'Nueva reserva de cita',
-        html: `
-          <h1>Nueva reserva realizada</h1>
-          <ul>
-            <li><b>Usuario:</b> ${nombre_usuario}</li>
-            <li><b>Email:</b> ${email}</li>
-            <li><b>Fecha:</b> ${fechaTexto}</li>
-            <li><b>Hora:</b> ${hueco.hora_inicio}</li>
-            <li><b>Motivo:</b> ${motivo_consulta || 'No especificado'}</li>
-          </ul>
-        `,
+      const datosCita = {
+        usuarioId: user.id,
+        citaId: citaCreada.insertId,
+        email,
+        nombre: nombre_usuario,
+        fecha: fechaTexto,
+        hora: hueco.hora_inicio,
+        modalidad: hueco.modalidad,
+        sede: hueco.sede_cita,
+        enlace: eventoGoogle.enlace_meet,
+      };
+      await enviarConfirmacionCita(datosCita);
+      await enviarAvisoAdminCita({
+        usuarioId: user.id,
+        citaId: citaCreada.insertId,
+        usuario: nombre_usuario,
+        email,
+        fecha: fechaTexto,
+        hora: hueco.hora_inicio,
+        accion: 'nueva cita',
       });
     } catch (emailErr) {
-      console.error('[reservar] Error al enviar email de notificación:', emailErr.message);
+      console.error('[reservar] No se pudo encolar el email de la cita:', emailErr.message);
     }
 
     return json(res, 201, {

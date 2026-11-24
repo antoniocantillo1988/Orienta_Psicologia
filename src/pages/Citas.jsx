@@ -161,12 +161,12 @@ export default function Citas() {
       {/* ── Huecos del día seleccionado ── */}
       <section className="mb-10">
         <h2 className="text-base font-semibold text-stone-700 mb-4">
-          Huecos para el {diaSeleccionado?.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
+          Horas disponibles para el {diaSeleccionado?.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
         </h2>
         
         <div className="flex flex-wrap gap-2">
           {huecosDelDia.length === 0 ? (
-            <p className="text-sm text-stone-400">No hay huecos este día.</p>
+            <p className="text-sm text-stone-400">No hay disponibilidad para este día. Si lo prefiere puede contactar conmigo</p>
           ) : (
             huecosDelDia.map((h) => {
               const fechaHueco = new Date(`${h.fecha}T${h.hora_inicio || '00:00'}`);

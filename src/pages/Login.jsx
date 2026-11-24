@@ -1,12 +1,13 @@
 // src/pages/Login.jsx
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // 1. Cambiamos 'email' por 'identificador' en el estado
   const [form, setForm] = useState({ identificador: '', password: '' });
@@ -26,7 +27,7 @@ export default function Login() {
       // 2. Se enviará { identificador, password } al backend
       const data = await api.post('/auth/login', form);
       login(data.token, data.user);
-      navigate('/dashboard');
+      navigate(location.state?.from || '/campus', { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -99,7 +100,7 @@ export default function Login() {
 
         <p className="text-center text-sm text-stone-500 mt-6">
           ¿No tienes cuenta?{' '}
-          <Link to="/registro" className="text-teal-600 hover:underline font-medium">
+          <Link to="/registro" state={location.state} className="text-teal-600 hover:underline font-medium">
             Regístrate gratis
           </Link>
         </p>

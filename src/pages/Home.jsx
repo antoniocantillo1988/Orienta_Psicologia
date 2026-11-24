@@ -49,7 +49,7 @@ export default function Home() {
               ¿Cuidas de alguien y sientes que ya no te queda energía para ti?
             </h1>
             <p className="mt-4 text-stone-600">
-              No tienes que llevar este peso a solas. Te acompaño de forma cercana con estrategias prácticas de autocuidado, gestión del estrés y apoyo familiar en Málaga, a domicilio y online.
+             Te acompaño de forma cercana con estrategias prácticas de autocuidado, gestión del estrés y apoyo familiar a domicilio en Málaga y online.
             </p>
             <p className="mt-3 font-serif text-2xl font-bold text-sage-600">
               Acompañamiento a personas que cuidan
@@ -68,10 +68,23 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Imagen de la consulta */}
-      <section>
-        <img src="/foto-sala.jpg" alt="Consulta" className="h-80 w-full rounded-3xl object-cover shadow-suave" />
-        <p className="mt-4 text-center font-serif italic text-stone-500">
+      {/* Imagen de la consulta con llamada a la acción semitransparente */}
+      <section className="space-y-4">
+        <div className="relative isolate flex min-h-[38rem] items-end overflow-hidden rounded-3xl shadow-suave">
+          <img src="/foto-sala.jpg" alt="Consulta" className="absolute inset-0 -z-20 h-full w-full object-cover" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-tierra-800/55 via-tierra-800/10 to-transparent" />
+          <section className="m-4 max-w-3xl rounded-3xl border border-white/55 bg-white/60 p-8 text-center shadow-suave backdrop-blur-md sm:m-8 sm:p-10">
+            <h2 className="font-serif text-2xl font-bold text-tierra-800">No tienes que cargar con todo solo o sola.</h2>
+            <p className="mt-3 text-stone-700">
+              Cuidar de un familiar con una enfermedad neurodegenerativa supone un desgaste invisible, y muchas veces quien cuida se olvida de sí mismo hasta llegar al límite. Mi objetivo es acompañarte para que encuentres respiro, alivies la tensión y recuperes el equilibrio en tu día a día, sin tecnicismos y con pautas que te funcionen en casa.
+            </p>
+            <Link to="/preguntas-frecuentes" className="btn-primary mt-6 inline-flex justify-center">Preguntas frecuentes</Link>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-stone-600">
+              Atención a domicilio en Málaga capital y online, adaptadas a tus horarios y necesidades.
+            </p>
+          </section>
+        </div>
+        <p className="text-center font-serif italic text-stone-500">
           Un espacio diseñado para tu bienestar y tranquilidad.
         </p>
       </section>
@@ -89,24 +102,9 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Llamada a la acción */}
-      <section className="rounded-3xl border border-crema-200 bg-white p-8 text-center shadow-suave sm:p-10">
-        <h2 className="font-serif text-2xl font-bold text-tierra-800">No tienes que cargar con todo solo o sola. </h2>        
-        <p className="mt-3 text-stone-600">
-            Cuidar de un familiar con una enfermedad neurodegenerativa supone un desgaste invisible, y muchas veces quien cuida se olvida de sí mismo hasta llegar al límite. Mi objetivo es acompañarte para que encuentres respiro, alivies la tensión y recuperes el equilibrio en tu día a día, sin tecnicismos y con pautas que te funcionen en casa.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link to="/citas" className="btn-primary">Pedir cita previa</Link>
-          <a href="https://wa.me/34678766839" target="_blank" rel="noopener noreferrer" className="btn-outline">Consultar dudas por WhatsApp</a>
-        </div>
-        <p className="mx-auto mt-3 max-w-xl text-stone-600">
-          Atención a domicilio en Málaga capital y online, adaptadas a tus horarios y necesidades.
-        </p>
-      </section>
-
       {/* Carrusel de testimonios (desactivado hasta tener testimonios reales) */}
       <section className="overflow-hidden rounded-3xl bg-sage-500 px-6 py-12 text-center text-white">
-        <h2 className="mb-8 font-serif text-2xl font-bold">Lo que dicen de nosotros</h2>
+        <h2 className="mb-8 font-serif text-2xl font-bold">Lo que dicen de mí</h2>
         <div className="relative flex h-44 items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.div
