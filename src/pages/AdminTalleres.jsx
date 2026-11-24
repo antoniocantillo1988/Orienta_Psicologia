@@ -43,7 +43,6 @@ function Aviso({ aviso }) {
 
 export default function AdminTalleres() {
   const [cursos, setCursos] = useState([]);
-  const [cuotaMembresia, setCuotaMembresia] = useState(20);
   const [seleccionado, setSeleccionado] = useState(null);
   const [curso, setCurso] = useState(CURSO_VACIO);
   const [contenidos, setContenidos] = useState([]);
@@ -59,7 +58,6 @@ export default function AdminTalleres() {
     try {
       const data = await api.get('/admin/talleres');
       setCursos(data.cursos || []);
-      setCuotaMembresia(data.cuota_membresia ?? 20);
       if (seleccionado) {
         const actualizado = (data.cursos || []).find((item) => Number(item.id) === Number(seleccionado));
         if (actualizado) setCurso({ ...actualizado, publicado: Number(actualizado.publicado) === 1 });
@@ -279,7 +277,7 @@ export default function AdminTalleres() {
                 <span className="relative block">
                   <select value={curso.tipo_acceso} onChange={(event) => {
                     const tipo_acceso = event.target.value;
-                    setCurso({ ...curso, tipo_acceso, ...(tipo_acceso === 'membresia' ? { precio: String(cuotaMembresia), moneda: 'EUR' } : {}) });
+                    setCurso({ ...curso, tipo_acceso, ...(tipo_acceso === 'membresia' ? { precio: '20', moneda: 'EUR' } : {}) });
                   }} className="w-full appearance-none rounded-xl border border-crema-300 bg-white px-4 py-3 pr-10 text-sm outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100">
                     <option value="gratis">Gratuito</option><option value="pago">Pago único</option><option value="membresia">Membresía mensual</option>
                   </select>

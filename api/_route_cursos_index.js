@@ -21,7 +21,7 @@ export default async function handler(req, res) {
                       WHERE im.usuario_id = ? AND cm.tipo_acceso = 'membresia'
                         AND im.estado = 'activa' AND im.stripe_subscription_id IS NOT NULL
                         AND im.fecha_fin > NOW()
-                    ) THEN 'activa'
+                    ) THEN CASE WHEN i.estado = 'activa' THEN 'activa' ELSE 'disponible_membresia' END
                     WHEN i.estado = 'activa' AND (
                       c.tipo_acceso = 'gratis'
                       OR (c.tipo_acceso = 'pago' AND i.stripe_checkout_session_id IS NOT NULL)

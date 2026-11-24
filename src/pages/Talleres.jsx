@@ -134,9 +134,13 @@ export default function Talleres() {
     setAccion(`${curso.tipo_acceso}-${curso.id}`);
     setMensaje('');
     try {
-      if (curso.tipo_acceso === 'gratis') {
+      const incluidaEnMembresia = curso.tipo_acceso === 'membresia'
+        && curso.inscripcion_estado === 'disponible_membresia';
+      if (curso.tipo_acceso === 'gratis' || incluidaEnMembresia) {
         await api.post('/cursos/inscribirse', { curso_id: curso.id });
-        setMensaje('Ya estás inscrito. Encontrarás el curso en tu espacio personal.');
+        setMensaje(incluidaEnMembresia
+          ? 'Ya estás inscrito. Encontrarás este curso en Campus Orienta.'
+          : 'Ya estás inscrito. Encontrarás el curso en tu espacio personal.');
         await cargarCursos();
       } else {
         const data = await api.post('/stripe/checkout', { curso_id: curso.id });
@@ -294,7 +298,11 @@ export default function Talleres() {
                       user ? (
                         <button type="button" className="btn-primary" onClick={() => inscribirse(curso)} disabled={Boolean(accion)}>
                           {busy ? <LoaderCircle size={16} className="animate-spin" /> : curso.tipo_acceso === 'gratis' ? <BookOpen size={16} /> : <CreditCard size={16} />}
-                          {curso.tipo_acceso === 'gratis' ? 'Inscribirme gratis' : curso.tipo_acceso === 'membresia' ? 'Suscribirme' : 'Comprar curso'}
+                          {curso.tipo_acceso === 'gratis'
+                            ? 'Inscribirme gratis'
+                            : curso.inscripcion_estado === 'disponible_membresia'
+                              ? 'Inscribirme con mi membresía'
+                              : curso.tipo_acceso === 'membresia' ? 'Suscribirme' : 'Comprar curso'}
                         </button>
                       ) : (
                         <Link to="/login" state={{ from: { pathname: '/talleres', search: `?checkout=${curso.id}` } }} className="btn-primary">

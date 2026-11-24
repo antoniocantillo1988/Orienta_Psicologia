@@ -17,23 +17,58 @@ export default async function handler(req, res) {
       [cursoId]
     );
     if (!curso) return json(res, 404, { error: 'El curso no está disponible.' });
-    if (curso.tipo_acceso !== 'gratis') {
-      return json(res, 400, { error: 'Este curso requiere un pago.' });
-    }
+    if (curso.tipo_acceso === 'membresia') {
+      const [membresia] = await query(
+        `SELECT i.stripe_subscription_id
+         FROM inscripciones i
+         JOIN cursos c ON c.id = i.curso_id
+         WHERE i.usuario_id = ? AND c.tipo_acceso = 'membresia'
+           AND i.estado = 'activa' AND i.stripe_subscription_id IS NOT NULL
+           AND i.fecha_fin > NOW()
+         ORDER BY i.fecha_fin DESC, i.id DESC
+         LIMIT 1`,
+        [user.id]
+      );
+      if (!membresia) {
+        return json(res, 403, { error: 'Necesitas una membresía vigente para inscribirte en este curso.' });
+      }
 
-    await query(
-      `INSERT INTO inscripciones
-         (usuario_id, curso_id, estado, fecha_inicio, fecha_fin,
-          stripe_checkout_session_id, stripe_subscription_id)
-       VALUES (?, ?, 'activa', NOW(), NULL, NULL, NULL)
-       ON DUPLICATE KEY UPDATE
-         estado = 'activa',
-         fecha_inicio = COALESCE(fecha_inicio, NOW()),
-         fecha_fin = NULL,
-         stripe_checkout_session_id = NULL,
-         stripe_subscription_id = NULL`,
-      [user.id, cursoId]
-    );
+      const [inscripcionExistente] = await query(
+        `SELECT stripe_subscription_id,
+                (estado = 'activa' AND fecha_fin > NOW()) AS suscripcion_vigente
+         FROM inscripciones WHERE usuario_id = ? AND curso_id = ?`,
+        [user.id, cursoId]
+      );
+      if (inscripcionExistente?.stripe_subscription_id && Number(inscripcionExistente.suscripcion_vigente) === 1) {
+        return json(res, 200, { ok: true, ya_inscrito: true });
+      }
+
+      await query(
+        `INSERT INTO inscripciones
+           (usuario_id, curso_id, estado, fecha_inicio, fecha_fin,
+            stripe_checkout_session_id, stripe_subscription_id)
+         VALUES (?, ?, 'activa', NOW(), NULL, NULL, NULL)
+         ON DUPLICATE KEY UPDATE
+           estado = 'activa', fecha_inicio = COALESCE(fecha_inicio, NOW())`,
+        [user.id, cursoId]
+      );
+    } else if (curso.tipo_acceso !== 'gratis') {
+      return json(res, 400, { error: 'Este curso requiere un pago.' });
+    } else {
+      await query(
+        `INSERT INTO inscripciones
+           (usuario_id, curso_id, estado, fecha_inicio, fecha_fin,
+            stripe_checkout_session_id, stripe_subscription_id)
+         VALUES (?, ?, 'activa', NOW(), NULL, NULL, NULL)
+         ON DUPLICATE KEY UPDATE
+           estado = 'activa',
+           fecha_inicio = COALESCE(fecha_inicio, NOW()),
+           fecha_fin = NULL,
+           stripe_checkout_session_id = NULL,
+           stripe_subscription_id = NULL`,
+        [user.id, cursoId]
+      );
+    }
 
     try {
       const [[usuario], [inscripcion]] = await Promise.all([

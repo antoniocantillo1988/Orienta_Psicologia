@@ -26,7 +26,7 @@ export default async function handler(req, res) {
          AND (
            (c.tipo_acceso = 'gratis' AND i.estado = 'activa')
            OR (c.tipo_acceso = 'pago' AND i.estado = 'activa' AND i.stripe_checkout_session_id IS NOT NULL)
-           OR (c.tipo_acceso = 'membresia' AND EXISTS (
+           OR (c.tipo_acceso = 'membresia' AND i.estado = 'activa' AND EXISTS (
              SELECT 1
              FROM inscripciones im
              JOIN cursos cm ON cm.id = im.curso_id

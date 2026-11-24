@@ -37,6 +37,7 @@ export default async function handler(req, res) {
     const inscritaActiva = curso.inscripcion_estado === 'activa';
     const pagoUnicoValidado = curso.tipo_acceso === 'pago' && Boolean(curso.stripe_checkout_session_id);
     const membresiaVigente = curso.tipo_acceso === 'membresia'
+      && inscritaActiva
       && Number(curso.membresia_activa) === 1;
     const accesoGratis = curso.tipo_acceso === 'gratis';
     const tieneAcceso = curso.tipo_acceso === 'membresia'
@@ -49,6 +50,8 @@ export default async function handler(req, res) {
       return json(res, 403, {
         error: gestionarMembresia
           ? 'Tu pago mensual necesita revisión. Te llevaremos a Stripe para actualizarlo.'
+          : curso.tipo_acceso === 'membresia' && Number(curso.membresia_activa) === 1
+            ? 'Tu membresía incluye este curso. Inscríbete desde el catálogo para añadirlo a Campus Orienta.'
           : curso.tipo_acceso === 'gratis'
             ? 'Este curso gratuito requiere inscripción desde el catálogo.'
             : 'Para entrar en este curso, primero debes completar el pago en Stripe.',

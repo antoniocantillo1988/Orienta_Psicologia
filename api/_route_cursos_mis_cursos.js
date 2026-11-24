@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       [user.id]
     );
 
-    let cursos = await query(
+    const cursos = await query(
       `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
               c.precio, c.moneda, c.duracion_horas, i.fecha_inicio,
               i.fecha_finalizacion, i.estado AS inscripcion_estado,
@@ -24,6 +24,12 @@ export default async function handler(req, res) {
                 c.tipo_acceso = 'gratis'
                 OR (c.tipo_acceso = 'pago' AND i.stripe_checkout_session_id IS NOT NULL)
                 OR (c.tipo_acceso = 'membresia' AND i.stripe_subscription_id IS NOT NULL AND i.fecha_fin > NOW())
+                OR (c.tipo_acceso = 'membresia' AND EXISTS (
+                  SELECT 1 FROM inscripciones im JOIN cursos cm ON cm.id = im.curso_id
+                  WHERE im.usuario_id = ? AND cm.tipo_acceso = 'membresia'
+                    AND im.estado = 'activa' AND im.stripe_subscription_id IS NOT NULL
+                    AND im.fecha_fin > NOW()
+                ))
               ) THEN 1 ELSE 0 END AS puede_acceder
        FROM inscripciones i
        JOIN cursos c ON c.id = i.curso_id
@@ -32,33 +38,17 @@ export default async function handler(req, res) {
            c.tipo_acceso = 'gratis'
            OR (c.tipo_acceso = 'pago' AND i.stripe_checkout_session_id IS NOT NULL)
            OR (c.tipo_acceso = 'membresia' AND i.stripe_subscription_id IS NOT NULL AND i.fecha_fin > NOW())
+           OR (c.tipo_acceso = 'membresia' AND EXISTS (
+             SELECT 1 FROM inscripciones im JOIN cursos cm ON cm.id = im.curso_id
+             WHERE im.usuario_id = ? AND cm.tipo_acceso = 'membresia'
+               AND im.estado = 'activa' AND im.stripe_subscription_id IS NOT NULL
+               AND im.fecha_fin > NOW()
+           ))
          )) OR i.fecha_finalizacion IS NOT NULL
        )
        ORDER BY i.fecha_inicio DESC, c.id DESC`,
-      [user.id]
+      [user.id, user.id, user.id]
     );
-
-    if (membresia?.valida_hasta) {
-      const cursosMembresia = await query(
-        `SELECT c.id, c.titulo, c.descripcion, c.categoria, c.tipo_acceso,
-                c.precio, c.moneda, c.duracion_horas, i.fecha_inicio,
-                i.fecha_finalizacion, 'activa' AS inscripcion_estado,
-                1 AS puede_acceder
-         FROM cursos c
-         LEFT JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = ?
-         WHERE c.tipo_acceso = 'membresia' AND c.publicado = 1
-         ORDER BY c.fecha_creacion DESC, c.id DESC`,
-        [user.id]
-      );
-      const porId = new Map(cursos.map((curso) => [String(curso.id), curso]));
-      for (const curso of cursosMembresia) {
-        const previo = porId.get(String(curso.id));
-        porId.set(String(curso.id), previo
-          ? { ...curso, ...previo, inscripcion_estado: 'activa', puede_acceder: 1 }
-          : curso);
-      }
-      cursos = [...porId.values()];
-    }
 
     if (!cursos.length) return json(res, 200, {
       cursos: [],
