@@ -145,10 +145,41 @@ export async function enviarConfirmacionCurso({ usuarioId, cursoId, email, nombr
     <p>Tu progreso actual es <strong>${porcentaje}%</strong>. Te queda este contenido:</p>
     ${lista ? `<ul>${lista}</ul>` : '<p>El temario estará disponible pronto en el campus.</p>'}
     <p>Ya puedes continuar tu formación desde Campus Orienta.${fechaFin ? ` Tu membresía está pagada hasta el <strong>${fechaEspanola(fechaFin)}</strong>.` : ''}</p>`;
-  return encolarYEnviar({
-    usuarioId, cursoId, tipo: 'inscripcion', periodo, email,
-    asunto: `Inscripción confirmada: ${curso.titulo}`, contenido,
-  });
+  const precio = curso.precio != null
+    ? `${Number(curso.precio).toFixed(2)} ${escapar(curso.moneda || 'EUR')}${curso.tipo_acceso === 'membresia' ? ' al mes' : ''}`
+    : 'No aplica';
+  const acceso = curso.tipo_acceso === 'membresia'
+    ? 'Membresía mensual'
+    : curso.tipo_acceso === 'pago' ? 'Pago único' : 'Gratuito';
+  const detalleAdmin = `<p>Se ha registrado una nueva inscripción en Orienta Psicología.</p>
+    <ul>
+      <li><strong>Usuario:</strong> ${escapar(nombre || 'Sin nombre')} (ID ${escapar(usuarioId)})</li>
+      <li><strong>Correo del usuario:</strong> ${escapar(email || 'No disponible')}</li>
+      <li><strong>Curso:</strong> ${escapar(curso.titulo)}</li>
+      <li><strong>Tipo de acceso:</strong> ${acceso}</li>
+      <li><strong>Precio del curso:</strong> ${precio}</li>
+      <li><strong>Duración estimada:</strong> ${curso.duracion_horas ? `${escapar(curso.duracion_horas)} horas` : 'No especificada'}</li>
+      <li><strong>Fecha y hora:</strong> ${escapar(new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Madrid' }).format(new Date()))} (hora peninsular)</li>
+      ${fechaFin ? `<li><strong>Membresía vigente hasta:</strong> ${escapar(fechaEspanola(fechaFin))}</li>` : ''}
+    </ul>`;
+  const envios = await Promise.allSettled([
+    email ? encolarYEnviar({
+      usuarioId, cursoId, tipo: 'inscripcion', periodo, email,
+      asunto: `Inscripción confirmada: ${curso.titulo}`, contenido,
+    }) : Promise.resolve(false),
+    encolarYEnviar({
+      usuarioId, cursoId, tipo: 'aviso_admin_inscripcion', periodo,
+      email: 'antonio.es.cantillo@gmail.com',
+      asunto: `${nombre || 'Un usuario'} se ha inscrito a un curso`,
+      contenido: detalleAdmin,
+    }),
+  ]);
+  for (const [indice, resultado] of envios.entries()) {
+    if (resultado.status === 'rejected' || resultado.value !== true) {
+      console.error(`[campus/email] Falló el ${indice === 0 ? 'correo de confirmación al alumno' : 'aviso de inscripción al administrador'}.`);
+    }
+  }
+  return envios.every((resultado) => resultado.status === 'fulfilled' && resultado.value === true);
 }
 
 export async function enviarBienvenidaUsuario({ usuarioId, email, nombre }) {

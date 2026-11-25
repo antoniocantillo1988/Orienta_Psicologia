@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
   try {
     const [curso] = await query(
-      'SELECT id, titulo, tipo_acceso FROM cursos WHERE id = ? AND publicado = 1',
+      'SELECT id, titulo, tipo_acceso, precio, moneda, duracion_horas FROM cursos WHERE id = ? AND publicado = 1',
       [cursoId]
     );
     if (!curso) return json(res, 404, { error: 'El curso no está disponible.' });

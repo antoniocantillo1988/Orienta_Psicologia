@@ -77,7 +77,8 @@ async function handleEvent(event) {
     if (status === 'activa') {
       try {
         const [datos] = await query(
-          `SELECT u.email, u.nombre_usuario, c.titulo, c.duracion_horas
+          `SELECT u.email, u.nombre_usuario, c.titulo, c.duracion_horas,
+                  c.tipo_acceso, c.precio, c.moneda
            FROM usuarios u JOIN cursos c ON c.id = ? WHERE u.id = ?`,
           [courseId, userId]
         );
